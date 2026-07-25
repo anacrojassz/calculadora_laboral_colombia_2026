@@ -32,6 +32,7 @@
 }
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
 body{
   background:var(--paper);
   color:var(--ink);
@@ -39,6 +40,7 @@ body{
   font-size:15px;
   line-height:1.5;
   -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
 }
 button{font-family:inherit;cursor:pointer;}
 input,select{font-family:var(--mono);}
@@ -105,7 +107,7 @@ p.page-sub{color:var(--ink-soft);margin:0 0 28px;font-size:14.5px;max-width:640p
 .section-label::after{content:"";flex:1;height:1px;background:var(--line);}
 
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px 18px;}
-.field{display:flex;flex-direction:column;gap:5px;}
+.field{display:flex;flex-direction:column;gap:5px;justify-content:flex-end;}
 .field label{font-size:12px;color:var(--ink-soft);font-weight:500;}
 .field input[type=text],.field input[type=number],.field input[type=date],.field select{
   border:1px solid var(--line);border-radius:7px;padding:9px 10px;font-size:13.5px;
@@ -183,8 +185,28 @@ tr.total td.num{font-family:var(--mono);}
     padding:8px 14px;font-size:12.5px;white-space:nowrap;
   }
   .tab-mobile button.active{background:var(--gold);color:var(--gold-ink);font-weight:600;}
-  .content{padding:20px 16px 60px;}
+  .content{padding:16px 12px 60px;}
   .topbar{padding:12px 16px;}
+
+  /* Evita que iOS/Safari haga zoom automatico al tocar un campo: cualquier input con letra
+     menor a 16px dispara ese zoom. Tambien se agranda el area de toque para botones y campos. */
+  .field input[type=text],.field input[type=number],.field input[type=date],.field input[type=time],
+  .field select,input[type=text],input[type=number],input[type=date],input[type=time],select,textarea{
+    font-size:16px !important;padding:10px !important;
+  }
+  .btn{padding:10px 14px;font-size:13.5px;}
+  .btn.small{padding:8px 11px;font-size:12.5px;}
+  .checkbox-row input{width:20px;height:20px;}
+
+  /* Las tablas con muchas columnas (Turnos y Horarios, Liquidacion, etc.) no caben en una
+     pantalla angosta: se deja que hagan scroll horizontal dentro de su propia tarjeta, en vez
+     de comprimir el contenido hasta hacerlo ilegible. Las tablas simples de 2-3 columnas se
+     ajustan solas al ancho disponible sin necesitar scroll. */
+  .card{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  h1.page-title{font-size:24px;}
+  .grid{grid-template-columns:1fr;}
+  .result-strip{flex-direction:column;}
+  .result-box{min-width:0;}
 }
 .brand-watermark{font-family:var(--mono);font-size:10px;letter-spacing:.03em;color:var(--sidebar-ink-soft);margin-top:10px;line-height:1.6;}
 .watermark-doc{
