@@ -1,0 +1,2216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nómina Colombia · Calculadora Laboral</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#16213A;
+  --ink-soft:#445068;
+  --paper:#F5F3EC;
+  --paper-alt:#ECE8DB;
+  --card:#FFFFFF;
+  --line:#D9D2C0;
+  --sidebar-bg:#E3D5B8;
+  --sidebar-bg-soft:#D8C7A2;
+  --sidebar-ink:#3A2E1E;
+  --sidebar-ink-soft:#6B5C42;
+  --gold:#C96B56;
+  --gold-soft:#F5DAD1;
+  --gold-ink:#3A160E;
+  --green:#2F6B4F;
+  --green-soft:#E3EEE7;
+  --red:#A23B3B;
+  --red-soft:#F5E6E4;
+  --radius:10px;
+  --display:'Fraunces', serif;
+  --body:'IBM Plex Sans', sans-serif;
+  --mono:'IBM Plex Mono', monospace;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--body);
+  font-size:15px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;cursor:pointer;}
+input,select{font-family:var(--mono);}
+a{color:var(--gold);}
+
+/* ---------- layout ---------- */
+#app{display:flex;min-height:100vh;}
+.sidebar{
+  width:248px;flex:none;
+  background:var(--sidebar-bg);
+  color:var(--sidebar-ink);
+  padding:28px 0 20px;
+  display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;
+}
+.brand{padding:0 24px 22px;border-bottom:1px solid rgba(58,46,30,.15);margin-bottom:8px;}
+.brand-mark{font-family:var(--display);font-weight:600;font-size:22px;letter-spacing:.2px;color:var(--sidebar-ink);}
+.brand-sub{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--sidebar-ink-soft);margin-top:4px;}
+.nav{list-style:none;margin:8px 0 0;padding:0;flex:1;}
+.nav li{margin:2px 10px;}
+.nav button{
+  width:100%;text-align:left;background:none;border:none;color:var(--sidebar-ink-soft);
+  padding:11px 14px;border-radius:8px;font-size:13.5px;font-weight:500;
+  display:flex;align-items:center;gap:10px;transition:background .15s,color .15s;
+}
+.nav button .num{font-family:var(--mono);font-size:11px;color:var(--sidebar-ink-soft);width:16px;flex:none;opacity:.7;}
+.nav button:hover{background:rgba(58,46,30,.08);color:var(--sidebar-ink);}
+.nav button.active{background:var(--gold);color:var(--gold-ink);font-weight:600;}
+.nav button.active .num{color:var(--gold-ink);opacity:.7;}
+.sidebar-foot{padding:14px 24px 0;border-top:1px solid rgba(58,46,30,.15);font-size:11px;color:var(--sidebar-ink-soft);line-height:1.6;}
+
+.main{flex:1;min-width:0;padding:0;}
+.topbar{
+  background:var(--paper-alt);border-bottom:1px solid var(--line);
+  padding:16px 36px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;
+}
+.stamp{
+  border:1.5px dashed var(--gold);border-radius:10px;
+  padding:8px 16px;
+  font-family:var(--mono);font-size:11.5px;color:var(--ink);
+  background:var(--gold-soft);display:flex;gap:14px;align-items:baseline;flex-wrap:wrap;line-height:1.4;
+}
+.stamp span{display:inline-flex;align-items:baseline;gap:5px;}
+.stamp b{color:var(--gold);font-size:11px;letter-spacing:.05em;text-transform:uppercase;}
+.topbar-title{font-family:var(--display);font-weight:600;font-size:19px;}
+
+.content{padding:32px 36px 80px;max-width:1180px;}
+.tab-mobile{display:none;}
+
+h1.page-title{font-family:var(--display);font-weight:600;font-size:30px;margin:0 0 6px;color:var(--ink);}
+p.page-sub{color:var(--ink-soft);margin:0 0 28px;font-size:14.5px;max-width:640px;}
+
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:22px 24px;margin-bottom:22px;
+  max-width:100%;overflow-x:auto;
+}
+.card h2{font-family:var(--display);font-size:17px;font-weight:600;margin:0 0 4px;}
+.card .card-note{color:var(--ink-soft);font-size:12.5px;margin:0 0 16px;}
+.section-label{
+  font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--gold);font-weight:600;margin:0 0 14px;display:flex;align-items:center;gap:8px;
+}
+.section-label::after{content:"";flex:1;height:1px;background:var(--line);}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px 18px;}
+.field{display:flex;flex-direction:column;gap:5px;}
+.field label{font-size:12px;color:var(--ink-soft);font-weight:500;}
+.field input[type=text],.field input[type=number],.field input[type=date],.field select{
+  border:1px solid var(--line);border-radius:7px;padding:9px 10px;font-size:13.5px;
+  background:#fff;color:var(--ink);
+}
+.field input:focus,.field select:focus{outline:2px solid var(--gold);outline-offset:0;border-color:var(--gold);}
+.checkbox-row{display:flex;align-items:center;gap:8px;padding-top:6px;}
+.checkbox-row input{width:16px;height:16px;}
+.checkbox-row label{font-size:13px;color:var(--ink);}
+
+table{width:100%;border-collapse:collapse;font-size:13.5px;}
+th{
+  text-align:left;font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--ink-soft);border-bottom:1.5px solid var(--line);padding:8px 10px;font-weight:600;
+  overflow-wrap:break-word;word-break:break-word;
+}
+td{padding:9px 10px;border-bottom:1px solid var(--line);overflow-wrap:break-word;word-break:break-word;}
+td.num,th.num{text-align:right;font-family:var(--mono);}
+tr.total td{font-weight:700;border-top:1.5px solid var(--ink);border-bottom:none;}
+tr.total td.num{font-family:var(--mono);}
+.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-family:var(--mono);}
+.tag.green{background:var(--green-soft);color:var(--green);}
+.tag.red{background:var(--red-soft);color:var(--red);}
+.tag.gold{background:var(--gold-soft);color:var(--gold);}
+.tag.grey{background:var(--paper-alt);color:var(--ink-soft);border:1px solid var(--line);}
+
+.result-strip{display:flex;gap:14px;flex-wrap:wrap;margin-top:4px;}
+.result-box{
+  flex:1;min-width:160px;background:var(--paper-alt);border-radius:8px;padding:14px 16px;border:1px solid var(--line);
+}
+.result-box .k{font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;font-family:var(--mono);}
+.result-box .v{font-family:var(--mono);font-size:20px;font-weight:600;margin-top:4px;color:var(--ink);}
+.result-box.neto{background:var(--green-soft);border-color:var(--green);}
+.result-box.neto .v{color:var(--green);}
+.result-box.total{background:var(--gold-soft);border-color:var(--gold);}
+.result-box.total .v{color:var(--gold-ink);}
+
+.btn{
+  border:none;border-radius:7px;padding:9px 16px;font-size:13px;font-weight:600;
+  background:var(--ink);color:#fff;display:inline-flex;align-items:center;gap:6px;
+}
+.btn:hover{background:#233255;}
+.btn.gold{background:var(--gold);color:var(--gold-ink);}
+.btn.gold:hover{background:#A8543F;}
+.btn.ghost{background:none;color:var(--ink-soft);border:1px solid var(--line);}
+.btn.ghost:hover{border-color:var(--ink);color:var(--ink);}
+.btn.small{padding:5px 10px;font-size:12px;}
+.btn.danger{background:none;color:var(--red);border:1px solid var(--red-soft);}
+
+.hr{height:1px;background:var(--line);margin:22px 0;border:none;}
+.note{font-size:12px;color:var(--ink-soft);background:var(--paper-alt);border-left:3px solid var(--gold);padding:9px 12px;border-radius:0 6px 6px 0;margin-top:14px;}
+
+.tramo-card{border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin-bottom:12px;background:var(--paper-alt);}
+.tramo-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.tramo-head span{font-family:var(--mono);font-size:11px;color:var(--ink-soft);text-transform:uppercase;}
+.tramo-result{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);font-family:var(--mono);font-size:12px;}
+.tramo-result b{color:var(--ink-soft);font-weight:500;}
+
+.hist-table td,.hist-table th{font-size:12.5px;}
+
+@media print{
+  .sidebar,.topbar,.no-print{display:none !important;}
+  .content{padding:0;max-width:100%;}
+  body{background:#fff;}
+}
+
+@media (max-width:860px){
+  .sidebar{display:none;}
+  .tab-mobile{
+    display:flex;overflow-x:auto;gap:6px;padding:10px 14px;background:var(--sidebar-bg);
+    position:sticky;top:0;z-index:10;
+  }
+  .tab-mobile button{
+    flex:none;background:rgba(58,46,30,.07);color:var(--sidebar-ink-soft);border:none;border-radius:20px;
+    padding:8px 14px;font-size:12.5px;white-space:nowrap;
+  }
+  .tab-mobile button.active{background:var(--gold);color:var(--gold-ink);font-weight:600;}
+  .content{padding:20px 16px 60px;}
+  .topbar{padding:12px 16px;}
+}
+.brand-watermark{font-family:var(--mono);font-size:10px;letter-spacing:.03em;color:var(--sidebar-ink-soft);margin-top:10px;line-height:1.6;}
+.watermark-doc{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-25deg);
+  font-family:var(--display);font-size:90px;font-weight:700;color:rgba(201,107,86,0.09);
+  pointer-events:none;z-index:0;white-space:nowrap;
+}
+textarea{font-family:var(--body);}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// ==========================================================================
+// MOTOR DE CALCULO — Normativa laboral y de seguridad social de Colombia
+// (validado contra la hoja de cálculo Excel del mismo proyecto)
+// ==========================================================================
+const HISTORICO_SMMLV = [
+  { year: 2016, smmlv: 689455,   aux: 77700  },
+  { year: 2017, smmlv: 737717,   aux: 83140  },
+  { year: 2018, smmlv: 781242,   aux: 88211  },
+  { year: 2019, smmlv: 828116,   aux: 97032  },
+  { year: 2020, smmlv: 877803,   aux: 102854 },
+  { year: 2021, smmlv: 908526,   aux: 106454 },
+  { year: 2022, smmlv: 1000000,  aux: 117172 },
+  { year: 2023, smmlv: 1160000,  aux: 140606 },
+  { year: 2024, smmlv: 1300000,  aux: 162000 },
+  { year: 2025, smmlv: 1423500,  aux: 200000 },
+  { year: 2026, smmlv: 1750905,  aux: 249095 },
+];
+const JORNADA = [
+  { desde: '2000-01-01', hasta: '2023-07-15', horasSemana: 48, divisor: 240 },
+  { desde: '2023-07-16', hasta: '2024-07-15', horasSemana: 47, divisor: 235 },
+  { desde: '2024-07-16', hasta: '2025-07-15', horasSemana: 46, divisor: 230 },
+  { desde: '2025-07-16', hasta: '2026-07-14', horasSemana: 44, divisor: 220 },
+  { desde: '2026-07-15', hasta: '2099-12-31', horasSemana: 42, divisor: 210 },
+];
+const DOMINICAL = [
+  { desde: '2000-01-01', hasta: '2025-06-30', pct: 0.75 },
+  { desde: '2025-07-01', hasta: '2026-06-30', pct: 0.80 },
+  { desde: '2026-07-01', hasta: '2027-06-30', pct: 0.90 },
+  { desde: '2027-07-01', hasta: '2099-12-31', pct: 1.00 },
+];
+const ARL = { I: 0.00522, II: 0.01044, III: 0.02436, IV: 0.0435, V: 0.0696 };
+const RATES = {
+  recargoNocturno: 0.35, extraDiurna: 0.25, extraNocturna: 0.75,
+  saludEmpleado: 0.04, saludEmpleador: 0.085, pensionEmpleado: 0.04, pensionEmpleador: 0.12,
+  caja: 0.04, sena: 0.02, icbf: 0.03,
+  cesantias: 0.0833, interesesCesantias: 0.12, prima: 0.0833, vacaciones: 0.0417,
+  topeAuxSMMLV: 2, topeDotacionSMMLV: 2, topeParafiscalSMMLV: 10,
+};
+function d(dateStr){ return new Date(dateStr + 'T00:00:00'); }
+function findInRange(table, dateStr, key){
+  const t = d(dateStr).getTime();
+  for (const row of table){ if (t >= d(row.desde).getTime() && t <= d(row.hasta).getTime()) return row[key]; }
+  return table[table.length - 1][key];
+}
+function getSMMLV(dateStr){
+  const year = d(dateStr).getFullYear();
+  let row = HISTORICO_SMMLV.find(r => r.year === year);
+  if (!row) row = year < HISTORICO_SMMLV[0].year ? HISTORICO_SMMLV[0] : HISTORICO_SMMLV[HISTORICO_SMMLV.length - 1];
+  return { smmlv: row.smmlv, aux: row.aux };
+}
+function getDivisorHoras(dateStr){ return findInRange(JORNADA, dateStr, 'divisor'); }
+function getRecargoDominical(dateStr){ return findInRange(DOMINICAL, dateStr, 'pct'); }
+function daysBetween(inicio, fin){ return Math.round((d(fin).getTime() - d(inicio).getTime()) / 86400000); }
+
+// -------------------- Festivos de Colombia (Ley Emiliani + Ley 2578 de 2026) --------------------
+function easterDate(year){
+  const a = year % 19, b = Math.floor(year/100), c = year % 100;
+  const dd = Math.floor(b/4), e = b % 4, f = Math.floor((b+8)/25), g = Math.floor((b-f+1)/3);
+  const h = (19*a+b-dd-g+15) % 30, i = Math.floor(c/4), k = c % 4;
+  const l = (32+2*e+2*i-h-k) % 7, m = Math.floor((a+11*h+22*l)/451);
+  const month = Math.floor((h+l-7*m+114)/31), day = ((h+l-7*m+114) % 31) + 1;
+  return new Date(year, month-1, day);
+}
+function toEmilianiMonday(date){
+  const dow = date.getDay();
+  if(dow===1) return date;
+  const diff = (8-dow)%7;
+  const d2 = new Date(date); d2.setDate(d2.getDate()+(diff===0?7:diff));
+  return d2;
+}
+function addDaysDate(date,n){ const d2=new Date(date); d2.setDate(d2.getDate()+n); return d2; }
+function isoDate(dt){ return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0'); }
+const _festivosCache = {};
+function getFestivos(year){
+  if(_festivosCache[year]) return _festivosCache[year];
+  const list=[];
+  const add=(m,dd)=>list.push(new Date(year,m-1,dd));
+  add(1,1); add(5,1); add(7,20); add(8,7); add(12,8); add(12,25);
+  const movableFixed=[[1,6],[3,19],[6,29],[8,15],[10,12],[11,1],[11,11]];
+  if(year>=2026) movableFixed.push([7,9]); // Ley 2578 de 2026 - Virgen de Chiquinquira
+  movableFixed.forEach(([m,dd])=>list.push(toEmilianiMonday(new Date(year,m-1,dd))));
+  const e = easterDate(year);
+  list.push(addDaysDate(e,-3)); // Jueves Santo
+  list.push(addDaysDate(e,-2)); // Viernes Santo
+  list.push(toEmilianiMonday(addDaysDate(e,39))); // Ascension
+  list.push(toEmilianiMonday(addDaysDate(e,60))); // Corpus Christi
+  list.push(toEmilianiMonday(addDaysDate(e,68))); // Sagrado Corazon
+  const isoList = list.map(isoDate).sort();
+  _festivosCache[year] = isoList;
+  return isoList;
+}
+function esFestivo(dateStr){
+  const year = parseInt(dateStr.slice(0,4),10);
+  return getFestivos(year).includes(dateStr);
+}
+function esDomingoOFestivo(dateStr){
+  return d(dateStr).getDay()===0 || esFestivo(dateStr);
+}
+
+// -------------------- Division de un turno en segmentos diurno/nocturno x fecha --------------------
+function toMinutesOfDay(hhmm){ const [h,m]=hhmm.split(':').map(Number); return h*60+(m||0); }
+function addDaysISO(fecha,n){ const dt=d(fecha); dt.setDate(dt.getDate()+n); return isoDate(dt); }
+// almuerzoInicio ('HH:MM') y almuerzoMin (duracion en minutos) descuentan una ventana no paga
+// del turno; esa ventana no genera horas en ninguna categoria y no cuenta como jornada laboral.
+function splitTurno(fecha, horaInicio, horaFin, almuerzoInicio, almuerzoMin){
+  let startMin = toMinutesOfDay(horaInicio);
+  let endMin = toMinutesOfDay(horaFin);
+  if(endMin<=startMin) endMin += 1440; // cruza medianoche
+  almuerzoMin = almuerzoMin || 0;
+  let almStart = null, almEnd = null;
+  if(almuerzoMin > 0 && almuerzoInicio){
+    almStart = toMinutesOfDay(almuerzoInicio);
+    if(almStart < startMin) almStart += 1440;
+    almEnd = almStart + almuerzoMin;
+    // si la ventana de almuerzo cae fuera del turno, se ignora (no aplica)
+    if(almStart < startMin || almEnd > endMin){ almStart = null; almEnd = null; }
+  }
+  const dayCount = Math.ceil(endMin/1440)+1;
+  const boundariesSet = new Set([startMin,endMin]);
+  for(let day=0; day<dayCount; day++){
+    const base = day*1440;
+    [0,360,1140,1440].forEach(off=>{ const t=base+off; if(t>startMin && t<endMin) boundariesSet.add(t); });
+  }
+  if(almStart!==null){ boundariesSet.add(almStart); boundariesSet.add(almEnd); }
+  const sorted = Array.from(boundariesSet).sort((a,b)=>a-b);
+  const segments = [];
+  for(let i=0;i<sorted.length-1;i++){
+    const segStart=sorted[i], segEnd=sorted[i+1];
+    if(segEnd<=segStart) continue;
+    const mid=(segStart+segEnd)/2;
+    if(almStart!==null && mid>=almStart && mid<almEnd) continue; // ventana de almuerzo: no paga, se excluye
+    const dayOffset=Math.floor(mid/1440);
+    const minuteOfDay=mid-dayOffset*1440;
+    const esNocturno = minuteOfDay<360 || minuteOfDay>=1140;
+    segments.push({ fecha: addDaysISO(fecha,dayOffset), durHoras:(segEnd-segStart)/60, esNocturno });
+  }
+  return segments;
+}
+// Calcula, para un turno { fecha, horaInicio, horaFin, diaNoHabitual, esDescanso, almuerzoInicio,
+// almuerzoMin }, cuantas horas caen en cada categoria usada por el Simulador de Nomina. Si esDescanso
+// es true, el dia se paga como un dia ordinario dentro del salario mensual y no genera ninguna hora
+// de recargo o extra (por ejemplo, el dia de descanso semanal remunerado). El tiempo de almuerzo se
+// descuenta antes de clasificar. Dentro de cada turno, las primeras `jornadaOrdinariaDiaria` horas
+// trabajadas se consideran ordinarias (solo generan recargo si son nocturnas o si el dia es
+// domingo/festivo); todo lo que exceda ese umbral se considera hora extra (con el recargo de ley
+// correspondiente segun sea diurna, nocturna, dominical/festiva diurna o dominical/festiva nocturna).
+// Si diaNoHabitual es true, el turno completo se trata como extra (por ejemplo, si llamaron al
+// empleado un dia que no le correspondia trabajar segun su horario habitual).
+function calcularTurno(turno, jornadaOrdinariaDiaria){
+  const res = {heDiurnas:0,heNocturnas:0,heDomDiurnas:0,heDomNocturnas:0,recNocturno:0,recDomDiurno:0,recDomNocturno:0,totalHoras:0};
+  if(turno.esDescanso) return res;
+  const segs = splitTurno(turno.fecha, turno.horaInicio, turno.horaFin, turno.almuerzoInicio, turno.almuerzoMin);
+  const umbral = turno.diaNoHabitual ? 0 : (jornadaOrdinariaDiaria || 0);
+  let acumulado = 0;
+  segs.forEach(seg=>{
+    res.totalHoras += seg.durHoras;
+    const festivo = esDomingoOFestivo(seg.fecha);
+    const restanteOrdinario = Math.max(0, umbral - acumulado);
+    const horasOrdinarias = Math.min(seg.durHoras, restanteOrdinario);
+    const horasExtra = seg.durHoras - horasOrdinarias;
+    acumulado += seg.durHoras;
+    if(horasOrdinarias > 0){
+      if(festivo){ if(seg.esNocturno) res.recDomNocturno+=horasOrdinarias; else res.recDomDiurno+=horasOrdinarias; }
+      else { if(seg.esNocturno) res.recNocturno+=horasOrdinarias; /* diurno ordinario en dia habil: ya incluido en el salario */ }
+    }
+    if(horasExtra > 0){
+      if(festivo){ if(seg.esNocturno) res.heDomNocturnas+=horasExtra; else res.heDomDiurnas+=horasExtra; }
+      else { if(seg.esNocturno) res.heNocturnas+=horasExtra; else res.heDiurnas+=horasExtra; }
+    }
+  });
+  return res;
+}
+function calcularTotalesTurnos(lista, jornadaOrdinariaDiaria){
+  const tot = {heDiurnas:0,heNocturnas:0,heDomDiurnas:0,heDomNocturnas:0,recNocturno:0,recDomDiurno:0,recDomNocturno:0};
+  const detalle = lista.map(t=>{
+    const r = calcularTurno(t, jornadaOrdinariaDiaria);
+    Object.keys(tot).forEach(k=>tot[k]+=r[k]);
+    return Object.assign({}, t, r);
+  });
+  return { detalle, tot };
+}
+
+
+function liquidarPeriodo(input){
+  const { salario, fecha, diasLaborados, recibeAux,
+          heDiurnas=0, heNocturnas=0, heDomDiurnas=0, heDomNocturnas=0,
+          recNocturno=0, recDomDiurno=0, recDomNocturno=0,
+          bonificaciones=0, prestamos=0, otrosDescuentos=0,
+          exoneradoParafiscales=true, claseRiesgo='I' } = input;
+  const { smmlv, aux: auxVigente } = getSMMLV(fecha);
+  const divisor = getDivisorHoras(fecha);
+  const pctDom = getRecargoDominical(fecha);
+  const valorHora = salario / divisor;
+  const topeAux = smmlv * RATES.topeAuxSMMLV;
+  const aux = recibeAux ? auxVigente : 0;
+  const salarioDevengado = salario * diasLaborados / 30;
+  const auxProporcional = aux * diasLaborados / 30;
+  const valorHeDiurnas = heDiurnas * valorHora * (1 + RATES.extraDiurna);
+  const valorHeNocturnas = heNocturnas * valorHora * (1 + RATES.extraNocturna);
+  const valorHeDomDiurnas = heDomDiurnas * valorHora * (1 + RATES.extraDiurna + pctDom);
+  const valorHeDomNocturnas = heDomNocturnas * valorHora * (1 + RATES.extraNocturna + pctDom);
+  const valorRecNocturno = recNocturno * valorHora * RATES.recargoNocturno;
+  const valorRecDomDiurno = recDomDiurno * valorHora * pctDom;
+  const valorRecDomNocturno = recDomNocturno * valorHora * (pctDom + RATES.recargoNocturno);
+  const totalDevengado = salarioDevengado + auxProporcional + valorHeDiurnas + valorHeNocturnas +
+    valorHeDomDiurnas + valorHeDomNocturnas + valorRecNocturno + valorRecDomDiurno + valorRecDomNocturno + bonificaciones;
+  const ibc = totalDevengado - auxProporcional;
+  const dedSalud = ibc * RATES.saludEmpleado;
+  const dedPension = ibc * RATES.pensionEmpleado;
+  const totalDeducciones = dedSalud + dedPension + prestamos + otrosDescuentos;
+  const neto = totalDevengado - totalDeducciones;
+  const exonera = exoneradoParafiscales && salario < smmlv * RATES.topeParafiscalSMMLV;
+  const saludEmpleador = exonera ? 0 : ibc * RATES.saludEmpleador;
+  const pensionEmpleador = ibc * RATES.pensionEmpleador;
+  const arl = ibc * (ARL[claseRiesgo] ?? ARL.I);
+  const caja = ibc * RATES.caja;
+  const sena = exonera ? 0 : ibc * RATES.sena;
+  const icbf = exonera ? 0 : ibc * RATES.icbf;
+  const totalAportes = saludEmpleador + pensionEmpleador + arl + caja + sena + icbf;
+  const costoTotalPeriodo = totalDevengado + totalAportes;
+  return { smmlv, divisor, pctDom, valorHora, topeAux, salarioDevengado, auxProporcional,
+    valorHeDiurnas, valorHeNocturnas, valorHeDomDiurnas, valorHeDomNocturnas,
+    valorRecNocturno, valorRecDomDiurno, valorRecDomNocturno, bonificaciones, totalDevengado, ibc,
+    dedSalud, dedPension, prestamos, otrosDescuentos, totalDeducciones, neto,
+    saludEmpleador, pensionEmpleador, arl, caja, sena, icbf, totalAportes, costoTotalPeriodo };
+}
+function liquidarVacaciones(salario, fechaInicio, fechaFin){
+  const dias = daysBetween(fechaInicio, fechaFin);
+  return { dias, diasCausados: dias/24, valor: salario*dias/720 };
+}
+function liquidarCesantiasPrima(salario, aux, fechaInicio, fechaFin){
+  const dias = daysBetween(fechaInicio, fechaFin);
+  const base = salario + aux;
+  const cesantias = base*dias/360;
+  const intereses = cesantias*(dias/360)*RATES.interesesCesantias;
+  return { dias, base, cesantias, intereses, prima: cesantias };
+}
+function costoTotalEmpleado(input){
+  const { salario, recibeAux, fechaRef, exoneradoParafiscales=true, claseRiesgo='I',
+          recibeDotacion=false, valorDotacion=0, entregasDotacion=3,
+          otorgaAguinaldo=false, valorAguinaldo=0 } = input;
+  const { smmlv, aux: auxVigente } = getSMMLV(fechaRef);
+  const aux = recibeAux ? auxVigente : 0;
+  const exonera = exoneradoParafiscales && salario < smmlv*RATES.topeParafiscalSMMLV;
+  const saludEmpleador = exonera ? 0 : salario*RATES.saludEmpleador;
+  const pensionEmpleador = salario*RATES.pensionEmpleador;
+  const arl = salario*(ARL[claseRiesgo] ?? ARL.I);
+  const caja = salario*RATES.caja;
+  const sena = exonera ? 0 : salario*RATES.sena;
+  const icbf = exonera ? 0 : salario*RATES.icbf;
+  const totalAportes = saludEmpleador+pensionEmpleador+arl+caja+sena+icbf;
+  const provCesantias = (salario+aux)*RATES.cesantias;
+  const provIntereses = provCesantias*RATES.interesesCesantias;
+  const provPrima = (salario+aux)*RATES.prima;
+  const provVacaciones = salario*RATES.vacaciones;
+  const dotacionMensual = recibeDotacion ? (valorDotacion*entregasDotacion/12) : 0;
+  const aguinaldoMensual = otorgaAguinaldo ? (valorAguinaldo/12) : 0;
+  const costoTotalMensual = salario+aux+totalAportes+provCesantias+provIntereses+provPrima+provVacaciones+dotacionMensual+aguinaldoMensual;
+  const reservaMensual = provCesantias+provIntereses+provPrima+provVacaciones;
+  return { smmlv, aux, exonera, saludEmpleador, pensionEmpleador, arl, caja, sena, icbf, totalAportes,
+    provCesantias, provIntereses, provPrima, provVacaciones, dotacionMensual, aguinaldoMensual, costoTotalMensual, reservaMensual };
+}
+
+// Estimacion de referencia de lo que el empleador tendria que asumir si dejo de pagar los aportes a
+// seguridad social y parafiscales durante un numero de meses. Incluye el 100% del aporte mensual
+// obligatorio (salud 12.5%, pension 16%, ARL, caja, SENA/ICBF si no esta exonerado) porque, en la
+// practica, cuando el empleador nunca reporto la planilla, termina debiendo tanto su parte como la del
+// trabajador para poder regularizar la historia laboral. NO incluye posibles gastos medicos reales,
+// pension de invalidez, ni la sancion de la UGPP, que se calculan caso por caso; ver las notas de la
+// interfaz y la pestana Normativa Legal.
+function calcularMoraSeguridadSocial(input){
+  const { salario, mesesMora, claseRiesgo, tasaMoraMensual } = input;
+  const salud = salario * (RATES.saludEmpleado + RATES.saludEmpleador);
+  const pension = salario * (RATES.pensionEmpleado + RATES.pensionEmpleador);
+  const arl = salario * (ARL[claseRiesgo] ?? ARL.I);
+  const caja = salario * RATES.caja;
+  const sena = salario * RATES.sena;
+  const icbf = salario * RATES.icbf;
+  const aportesMensuales = salud + pension + arl + caja + sena + icbf;
+  const totalAportes = aportesMensuales * (mesesMora || 0);
+  const interesEstimado = totalAportes * (tasaMoraMensual || 0) * (mesesMora || 0);
+  const totalEstimado = totalAportes + interesEstimado;
+  return { aportesMensuales, totalAportes, interesEstimado, totalEstimado };
+}
+// Calcula un año (tramo) del contrato, descontando lo que ya se le pago o consigno al empleado
+// durante ese mismo año (cesantias ya consignadas al fondo, primas ya pagadas semestralmente,
+// vacaciones ya disfrutadas/compensadas) y cualquier prestamo que la empresa le haya otorgado y que
+// deba descontarse. El resultado distingue lo "causado" (lo que la ley genero ese año) de lo
+// "pendiente" (lo que realmente falta por pagar), para que la liquidacion final no duplique valores
+// que el empleado ya recibio en años anteriores.
+function liquidarTramo(t){
+  const { salario, recibeAux, fechaInicio, fechaFin,
+          cesantiasPagadas=0, primaPagada=0, vacacionesPagadas=0, prestamo=0 } = t;
+  const dias = daysBetween(fechaInicio, fechaFin);
+  const { aux: auxVigente } = getSMMLV(fechaInicio);
+  const aux = recibeAux ? auxVigente : 0;
+  const base = salario+aux;
+  const cesantiasCausadas = base*dias/360;
+  const cesantiasPendientes = Math.max(0, cesantiasCausadas - cesantiasPagadas);
+  const intereses = cesantiasPendientes*(dias/360)*RATES.interesesCesantias;
+  const primaCausada = base*dias/360;
+  const primaPendiente = Math.max(0, primaCausada - primaPagada);
+  const vacacionesCausadas = salario*dias/720;
+  const vacacionesPendientes = Math.max(0, vacacionesCausadas - vacacionesPagadas);
+  const totalAño = cesantiasPendientes + intereses + primaPendiente + vacacionesPendientes - prestamo;
+  return { dias, aux, cesantiasCausadas, cesantiasPendientes, intereses, primaCausada, primaPendiente,
+           vacacionesCausadas, vacacionesPendientes, prestamo, totalAño,
+           // alias por compatibilidad con nombres anteriores
+           cesantias: cesantiasCausadas, prima: primaCausada, vacaciones: vacacionesCausadas };
+}
+function liquidarContrato(tramos, salariosPendientes=0){
+  const acc = { totalDias:0, cesantiasCausadas:0, cesantiasPendientes:0, totalIntereses:0,
+                primaCausada:0, primaPendiente:0, vacacionesCausadas:0, vacacionesPendientes:0, totalPrestamos:0 };
+  const detalle = tramos.map(t=>{
+    const r = liquidarTramo(t);
+    acc.totalDias += r.dias;
+    acc.cesantiasCausadas += r.cesantiasCausadas;
+    acc.cesantiasPendientes += r.cesantiasPendientes;
+    acc.totalIntereses += r.intereses;
+    acc.primaCausada += r.primaCausada;
+    acc.primaPendiente += r.primaPendiente;
+    acc.vacacionesCausadas += r.vacacionesCausadas;
+    acc.vacacionesPendientes += r.vacacionesPendientes;
+    acc.totalPrestamos += r.prestamo;
+    return Object.assign({}, t, r);
+  });
+  const total = acc.cesantiasPendientes + acc.totalIntereses + acc.primaPendiente + acc.vacacionesPendientes
+                - acc.totalPrestamos + salariosPendientes;
+  return Object.assign({ detalle, total, salariosPendientes }, acc);
+}
+
+// -------------------- Liquidacion con salario variable (recargos, horas extra habituales) --------------------
+// Cuando el ingreso mensual del empleado cambia por horas extra o recargos habituales, la ley no usa
+// un salario fijo para liquidar, sino el PROMEDIO de lo realmente devengado — y cada prestacion usa
+// su propia ventana de promedio: cesantias e intereses = ultimos 12 meses (o el tiempo trabajado si es
+// menor); prima = ultimos 6 meses (el semestre correspondiente); vacaciones = ultimos 12 meses, pero
+// EXCLUYENDO horas extra y el pago por trabajo dominical/festivo (el recargo nocturno si se incluye).
+// Fuentes: Art. 253 CST (cesantias), Art. 306 y 127 CST (prima), Art. 192 CST (vacaciones).
+function calcularLiquidacionVariable(meses){
+  const ordenados = meses.filter(m=>m.mes).slice().sort((a,b)=> a.mes.localeCompare(b.mes));
+  const n = ordenados.length;
+  if(n===0){
+    return { n:0, diasTotales:0, promedioCesantias:0, promedioPrima:0, promedioVacaciones:0,
+             cesantias:0, intereses:0, prima:0, vacaciones:0, total:0, ordenados:[] };
+  }
+  const ultimos12 = ordenados.slice(-12);
+  const ultimos6 = ordenados.slice(-6);
+  const sum = (arr,key) => arr.reduce((s,m)=>s+(Number(m[key])||0),0);
+  const promedioCesantias = sum(ultimos12,'devengado') / ultimos12.length;
+  const promedioPrima = sum(ultimos6,'devengado') / ultimos6.length;
+  const baseVacMes = ordenados.map(m=> Math.max(0, (Number(m.devengado)||0) - (Number(m.extrasYDominical)||0)));
+  const baseVacUlt12 = baseVacMes.slice(-12);
+  const promedioVacaciones = baseVacUlt12.reduce((a,b)=>a+b,0) / baseVacUlt12.length;
+
+  const diasTotales = n*30; // convencion comercial: cada mes ingresado equivale a 30 dias
+  const diasSemestre = Math.min(n,6)*30;
+
+  const cesantias = promedioCesantias * diasTotales/360;
+  const intereses = cesantias * (diasTotales/360) * RATES.interesesCesantias;
+  const prima = promedioPrima * diasSemestre/360;
+  const vacaciones = promedioVacaciones * diasTotales/720;
+  const total = cesantias + intereses + prima + vacaciones;
+
+  return { n, diasTotales, promedioCesantias, promedioPrima, promedioVacaciones,
+           cesantias, intereses, prima, vacaciones, total, ordenados };
+}
+
+// ==========================================================================
+// UTILIDADES DE FORMATO
+// ==========================================================================
+const fmt0 = n => new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0,minimumFractionDigits:0}).format(n||0);
+const fmt2 = n => new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:2,minimumFractionDigits:2}).format(n||0);
+const pct1 = n => (n*100).toFixed(1).replace('.0','') + '%';
+const todayISO = () => new Date().toISOString().slice(0,10);
+function fmtDateHuman(iso){
+  if(!iso) return '';
+  const dt = d(iso);
+  return dt.toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'});
+}
+
+// ==========================================================================
+// ESTADO
+// ==========================================================================
+const TODAY = todayISO();
+const DEFAULT_SMMLV = getSMMLV(TODAY).smmlv;
+
+const state = {
+  activeTab: 'inicio',
+  simulador: {
+    empresa:'Mi Empresa S.A.S.', nit:'900.000.000-0', empleado:'', cedula:'', cargo:'',
+    modoPago:'mensual', salario: DEFAULT_SMMLV, jornalValor: Math.round(DEFAULT_SMMLV/30),
+    fecha: TODAY, dias:30, recibeAux:true,
+    heDiurnas:0, heNocturnas:0, heDomDiurnas:0, heDomNocturnas:0,
+    recNocturno:0, recDomDiurno:0, recDomNocturno:0,
+    bonificaciones:0, prestamos:0, otrosDescuentos:0,
+    exonerado:true, claseRiesgo:'I', vista:'detalle',
+  },
+  sugerencias: { nombre:'', correo:'', tipo:'Mejora', mensaje:'' },
+  iaConsulta: { salario:0, cargo:'', tipoContrato:'', fechaInicio:'', pregunta:'', copiado:false },
+  mora: { salario: DEFAULT_SMMLV, mesesMora: 1, claseRiesgo: 'I', tasaMoraMensual: 0.015 },
+  turnos: {
+    jornadaOrdinariaDiaria: 8,
+    horasOrdinariasSemanales: 42,
+    diasLaboralesSemana: 5,
+    horasEntreSemana: 7.5,
+    lista: [ { fecha: TODAY, horaInicio:'08:00', horaFin:'17:00', diaNoHabitual:false, esDescanso:false, almuerzoInicio:'12:00', almuerzoMin:60 } ],
+    generador: {
+      fechaInicio: TODAY, fechaFin: TODAY,
+      patron: {
+        lun:{activo:true,  inicio:'08:00', fin:'17:00', almuerzoInicio:'12:00', almuerzoMin:60},
+        mar:{activo:true,  inicio:'08:00', fin:'17:00', almuerzoInicio:'12:00', almuerzoMin:60},
+        mie:{activo:true,  inicio:'08:00', fin:'17:00', almuerzoInicio:'12:00', almuerzoMin:60},
+        jue:{activo:true,  inicio:'08:00', fin:'17:00', almuerzoInicio:'12:00', almuerzoMin:60},
+        vie:{activo:true,  inicio:'08:00', fin:'17:00', almuerzoInicio:'12:00', almuerzoMin:60},
+        sab:{activo:false, inicio:'08:00', fin:'12:00', almuerzoInicio:'12:00', almuerzoMin:0},
+        dom:{activo:false, inicio:'08:00', fin:'12:00', almuerzoInicio:'12:00', almuerzoMin:0},
+      },
+    },
+    simHorario: {
+      dias: {lun:true, mar:true, mie:true, jue:true, vie:true, sab:false, dom:false},
+      horaIngreso:'08:00', horasTrabajo:8, almuerzoInicio:'12:00', almuerzoMin:60,
+    },
+  },
+  vacaciones: { salario: DEFAULT_SMMLV, fechaInicio:'2025-01-01', fechaFin: TODAY },
+  cesantias: { salario: DEFAULT_SMMLV, aux: getSMMLV(TODAY).aux, fechaInicio:'2026-01-01', fechaFin: TODAY },
+  contrato: {
+    tramos: [ { salario: getSMMLV('2025-01-01').smmlv, recibeAux:true, fechaInicio:'2025-01-01', fechaFin: TODAY,
+                cesantiasPagadas:0, primaPagada:0, vacacionesPagadas:0, prestamo:0 } ],
+    salariosPendientes: 0,
+  },
+  costo: {
+    salario: DEFAULT_SMMLV, recibeAux:true, claseRiesgo:'I', exonerado:true,
+    recibeDotacion:true, valorDotacion:100000, entregasDotacion:3,
+    otorgaAguinaldo:false, valorAguinaldo:0,
+  },
+  variable: {
+    meses: [ { mes: TODAY.slice(0,7)+'-01', devengado: DEFAULT_SMMLV, extrasYDominical: 0 } ],
+  },
+};
+
+const TABS = [
+  {id:'inicio', label:'Inicio'},
+  {id:'normativa', label:'Normativa Legal'},
+  {id:'tarifas', label:'Tarifas Vigentes'},
+  {id:'horarios', label:'Turnos y Horarios'},
+  {id:'nomina', label:'Simulador de Nómina'},
+  {id:'vacaciones', label:'Vacaciones'},
+  {id:'cesantias', label:'Cesantías y Prima'},
+  {id:'contrato', label:'Liquidación con Salario Fijo'},
+  {id:'variable', label:'Liquidación con Salario Variable'},
+  {id:'costo', label:'Costo Total Empleado'},
+  {id:'iaConsulta', label:'Consultas con IA'},
+  {id:'sugerencias', label:'Sugerencias'},
+];
+
+function setTab(id){ state.activeTab = id; render(); window.scrollTo(0,0); }
+function upd(section, field, value, kind){
+  let v = value;
+  if(kind==='number') v = value===''? 0 : parseFloat(value);
+  if(kind==='bool') v = value;
+  state[section][field] = v;
+  render();
+}
+function updTramo(i, field, value, kind){
+  let v = value;
+  if(kind==='number') v = value===''? 0 : parseFloat(value);
+  state.contrato.tramos[i][field] = v;
+  // Al definir o cambiar la fecha de inicio, se trae automaticamente el SMMLV vigente ese año
+  // como salario sugerido, para que el flujo sea: primero la fecha, luego el salario y las
+  // tarifas de ese año se completan solas.
+  if(field==='fechaInicio' && v){
+    state.contrato.tramos[i].salario = getSMMLV(v).smmlv;
+  }
+  render();
+}
+function updMoney(section, field, el){
+  const digits = el.value.replace(/\D/g,'');
+  state[section][field] = digits ? parseInt(digits,10) : 0;
+  render();
+}
+function updTramoMoney(i, field, el){
+  const digits = el.value.replace(/\D/g,'');
+  state.contrato.tramos[i][field] = digits ? parseInt(digits,10) : 0;
+  render();
+}
+function addTramo(){
+  const last = state.contrato.tramos[state.contrato.tramos.length-1];
+  const nextStart = last ? last.fechaFin : '2025-01-01';
+  state.contrato.tramos.push({ salario: getSMMLV(nextStart).smmlv, recibeAux:true, fechaInicio: nextStart, fechaFin: TODAY,
+    cesantiasPagadas:0, primaPagada:0, vacacionesPagadas:0, prestamo:0 });
+  render();
+}
+function removeTramo(i){
+  if(state.contrato.tramos.length<=1) return;
+  state.contrato.tramos.splice(i,1);
+  render();
+}
+function useSMMLVinTramo(i){
+  const t = state.contrato.tramos[i];
+  t.salario = getSMMLV(t.fechaInicio).smmlv;
+  render();
+}
+
+function addMesVariable(){
+  const lista = state.variable.meses;
+  const last = lista[lista.length-1];
+  let nextMes;
+  if(last && last.mes){
+    const dt = d(last.mes);
+    dt.setMonth(dt.getMonth()+1);
+    nextMes = isoDate(dt);
+  } else {
+    nextMes = TODAY.slice(0,7)+'-01';
+  }
+  lista.push({ mes: nextMes, devengado: getSMMLV(nextMes).smmlv, extrasYDominical: 0 });
+  render();
+}
+function removeMesVariable(i){
+  if(state.variable.meses.length<=1) return;
+  state.variable.meses.splice(i,1);
+  render();
+}
+function updMesVariable(i, field, value){
+  state.variable.meses[i][field] = value;
+  render();
+}
+function updMesVariableMoney(i, field, el){
+  const digits = el.value.replace(/\D/g,'');
+  state.variable.meses[i][field] = digits ? parseInt(digits,10) : 0;
+  render();
+}
+function useSMMLVenMes(i){
+  const m = state.variable.meses[i];
+  m.devengado = getSMMLV(m.mes).smmlv;
+  render();
+}
+
+function addTurno(){
+  const last = state.turnos.lista[state.turnos.lista.length-1];
+  const nextFecha = last ? addDaysISO(last.fecha,1) : TODAY;
+  state.turnos.lista.push({ fecha: nextFecha, horaInicio:'08:00', horaFin:'17:00', diaNoHabitual:false, esDescanso:false, almuerzoInicio:'12:00', almuerzoMin:60 });
+  render();
+}
+function removeTurno(i){
+  if(state.turnos.lista.length<=1) return;
+  state.turnos.lista.splice(i,1);
+  render();
+}
+function updTurno(i, field, value){
+  state.turnos.lista[i][field] = (field==='almuerzoMin') ? (parseInt(value,10)||0) : value;
+  render();
+}
+function duplicarTurno(i){
+  const t = state.turnos.lista[i];
+  const copia = Object.assign({}, t, { fecha: addDaysISO(t.fecha,1) });
+  state.turnos.lista.splice(i+1, 0, copia);
+  render();
+}
+function aplicarHorarioATodos(i){
+  const base = state.turnos.lista[i];
+  state.turnos.lista.forEach((t,idx)=>{
+    if(idx===i || t.esDescanso) return;
+    t.horaInicio = base.horaInicio;
+    t.horaFin = base.horaFin;
+    t.almuerzoInicio = base.almuerzoInicio;
+    t.almuerzoMin = base.almuerzoMin;
+  });
+  render();
+}
+function updJornadaOrdinaria(value){
+  state.turnos.jornadaOrdinariaDiaria = parseFloat(value)||0;
+  render();
+}
+function updHorasOrdinariasSemanales(value){
+  state.turnos.horasOrdinariasSemanales = parseFloat(value)||0;
+  usarJornadaCalculada();
+}
+function updDiasLaboralesSemana(value){
+  state.turnos.diasLaboralesSemana = parseFloat(value)||0;
+  usarJornadaCalculada();
+}
+function updHorasEntreSemana(value){
+  state.turnos.horasEntreSemana = parseFloat(value)||0;
+  usarJornadaCalculada();
+}
+function contarDiasActivosPatron(){
+  const patron = state.turnos.generador.patron;
+  return Object.values(patron).filter(d=>d.activo).length;
+}
+// Cuando se trabajan mas de 5 dias a la semana (tipicamente 6, con sabado), el patron habitual en
+// Colombia es: los primeros 5 dias tienen una jornada fija (horasEntreSemana) y el/los dia(s)
+// restante(s) —el sabado— absorbe(n) lo que falte para completar las horas ordinarias semanales.
+function hayDiaCorto(){ return state.turnos.diasLaboralesSemana > 5; }
+function diasCortosCount(){ return Math.max(0, state.turnos.diasLaboralesSemana - 5); }
+function horasDiaCortoCalculada(){
+  const n = diasCortosCount();
+  if(n<=0) return 0;
+  const restante = state.turnos.horasOrdinariasSemanales - state.turnos.horasEntreSemana*5;
+  return restante / n;
+}
+function jornadaDiariaCalculada(){
+  if(hayDiaCorto()) return state.turnos.horasEntreSemana;
+  const dias = state.turnos.diasLaboralesSemana;
+  if(!dias) return 0;
+  return state.turnos.horasOrdinariasSemanales / dias;
+}
+function horasATexto(horasDecimal){
+  const horas = Math.floor(horasDecimal);
+  const minutos = Math.round((horasDecimal - horas) * 60);
+  if(minutos===0) return horas + ' h';
+  return horas + ' h ' + minutos + ' min';
+}
+function usarJornadaCalculada(){
+  const v = jornadaDiariaCalculada();
+  if(v>0) state.turnos.jornadaOrdinariaDiaria = Math.round(v*100)/100;
+  render();
+}
+function updGenerador(field, value){
+  state.turnos.generador[field] = value;
+  render();
+}
+function updPatronDia(diaKey, field, value){
+  state.turnos.generador.patron[diaKey][field] = value;
+  // Sincroniza el conteo de dias laborales por semana con el patron, como valor de partida
+  // conveniente; el usuario puede seguir sobreescribiendolo libremente despues (5, 6 dias, etc.).
+  if(field==='activo'){
+    state.turnos.diasLaboralesSemana = contarDiasActivosPatron();
+    usarJornadaCalculada();
+  }
+  render();
+}
+
+// -------------------- Simulador de horario: hora de ingreso + almuerzo -> hora de salida --------------------
+// Suma minutos a una hora "HH:MM" y devuelve tanto la hora resultante como si cruzo la medianoche
+// (para poder avisarle al usuario, ya que un turno diario normal no deberia cruzar el dia).
+function sumarMinutosAHora(hhmm, minutosASumar){
+  const base = toMinutesOfDay(hhmm) + minutosASumar;
+  const cruzaMedianoche = base >= 1440;
+  const total = ((base % 1440) + 1440) % 1440;
+  const hh = String(Math.floor(total/60)).padStart(2,'0');
+  const mm = String(total%60).padStart(2,'0');
+  return { horaTexto: hh+':'+mm, cruzaMedianoche };
+}
+function calcularHoraSalida(horaIngreso, horasTrabajo, almuerzoMin){
+  const minutos = Math.round((horasTrabajo||0)*60) + (almuerzoMin||0);
+  return sumarMinutosAHora(horaIngreso, minutos);
+}
+function updSimHorario(field, value){
+  state.turnos.simHorario[field] = value;
+  render();
+}
+function updSimHorarioDia(diaKey, checked){
+  state.turnos.simHorario.dias[diaKey] = checked;
+  render();
+}
+// Aplica el horario calculado (ingreso, salida y almuerzo) a todos los dias marcados en el
+// simulador, permitiendo asi horarios distintos por grupo de dias (ej. 8h entre semana y 5h el
+// sabado): se corre el simulador una vez por cada grupo y se aplica cada vez.
+function aplicarSimHorarioAlPatron(){
+  const sim = state.turnos.simHorario;
+  const salida = calcularHoraSalida(sim.horaIngreso, sim.horasTrabajo, sim.almuerzoMin);
+  const patron = state.turnos.generador.patron;
+  Object.keys(sim.dias).forEach(k=>{
+    if(sim.dias[k]){
+      patron[k].activo = true;
+      patron[k].inicio = sim.horaIngreso;
+      patron[k].fin = salida.horaTexto;
+      patron[k].almuerzoInicio = sim.almuerzoInicio;
+      patron[k].almuerzoMin = sim.almuerzoMin;
+    }
+  });
+  state.turnos.diasLaboralesSemana = contarDiasActivosPatron();
+  usarJornadaCalculada();
+}
+
+function setMesCompleto(){
+  const g = state.turnos.generador;
+  const base = d(g.fechaInicio || TODAY);
+  const y = base.getFullYear(), m = base.getMonth();
+  const primero = new Date(y, m, 1);
+  const ultimo = new Date(y, m+1, 0);
+  g.fechaInicio = isoDate(primero);
+  g.fechaFin = isoDate(ultimo);
+  render();
+}
+const DIAS_SEMANA_KEYS = ['dom','lun','mar','mie','jue','vie','sab']; // indice = Date.getDay()
+// Genera una fila por CADA fecha del rango: los dias marcados como "trabaja" en el patron semanal
+// quedan con su horario; los demas quedan como dia de descanso (pagado, sin horas ni recargos),
+// para que el periodo completo quede visible y auditable de un vistazo.
+function generarTurnosDesdePatron(){
+  const g = state.turnos.generador;
+  const inicio = d(g.fechaInicio);
+  const fin = d(g.fechaFin);
+  if(fin < inicio) return;
+  const nuevos = [];
+  let cursor = new Date(inicio);
+  let guard = 0;
+  while(cursor <= fin && guard < 400){
+    const key = DIAS_SEMANA_KEYS[cursor.getDay()];
+    const cfg = g.patron[key];
+    if(cfg && cfg.activo){
+      nuevos.push({
+        fecha: isoDate(cursor), horaInicio: cfg.inicio, horaFin: cfg.fin,
+        diaNoHabitual:false, esDescanso:false, almuerzoInicio: cfg.almuerzoInicio, almuerzoMin: cfg.almuerzoMin,
+      });
+    } else {
+      nuevos.push({
+        fecha: isoDate(cursor), horaInicio: '00:00', horaFin: '00:00',
+        diaNoHabitual:false, esDescanso:true, almuerzoInicio: '12:00', almuerzoMin: 0,
+      });
+    }
+    cursor.setDate(cursor.getDate()+1);
+    guard++;
+  }
+  if(nuevos.length===0) return;
+  state.turnos.lista = nuevos;
+  render();
+  window.scrollTo(0,0);
+}
+function aplicarTurnosASimulador(){
+  const { tot } = calcularTotalesTurnos(state.turnos.lista, state.turnos.jornadaOrdinariaDiaria);
+  const s = state.simulador;
+  s.heDiurnas = Math.round(tot.heDiurnas*100)/100;
+  s.heNocturnas = Math.round(tot.heNocturnas*100)/100;
+  s.heDomDiurnas = Math.round(tot.heDomDiurnas*100)/100;
+  s.heDomNocturnas = Math.round(tot.heDomNocturnas*100)/100;
+  s.recNocturno = Math.round(tot.recNocturno*100)/100;
+  s.recDomDiurno = Math.round(tot.recDomDiurno*100)/100;
+  s.recDomNocturno = Math.round(tot.recDomNocturno*100)/100;
+  state.activeTab = 'nomina';
+  render();
+  window.scrollTo(0,0);
+}
+
+// ==========================================================================
+// COMPONENTES REUTILIZABLES
+// ==========================================================================
+function formatMiles(n){
+  if(n===''||n===null||n===undefined) return '';
+  return new Intl.NumberFormat('es-CO').format(n);
+}
+function fieldNumber(section, field, label, value, opts){
+  opts = opts || {};
+  const key = section+'.'+field;
+  return `<div class="field"><label>${label}</label>
+    <input type="number" step="${opts.step||1}" value="${value}" data-key="${key}"
+      oninput="upd('${section}','${field}',this.value,'number')"/></div>`;
+}
+function fieldMoney(section, field, label, value){
+  const key = section+'.'+field;
+  return `<div class="field"><label>${label}</label>
+    <input type="text" inputmode="numeric" data-key="${key}" value="${formatMiles(value)}"
+      oninput="updMoney('${section}','${field}',this)"/></div>`;
+}
+function fieldMoneyTramo(i, field, label, value){
+  const key = 'contrato.tramos.'+i+'.'+field;
+  return `<div class="field"><label>${label}</label>
+    <input type="text" inputmode="numeric" data-key="${key}" value="${formatMiles(value)}"
+      oninput="updTramoMoney(${i},'${field}',this)"/></div>`;
+}
+function fieldMoneyMes(i, field, label, value){
+  const key = 'variable.meses.'+i+'.'+field;
+  return `<div class="field"><label>${label}</label>
+    <input type="text" inputmode="numeric" data-key="${key}" value="${formatMiles(value)}"
+      oninput="updMesVariableMoney(${i},'${field}',this)"/></div>`;
+}
+function fieldDate(section, field, label, value){
+  const key = section+'.'+field;
+  return `<div class="field"><label>${label}</label>
+    <input type="date" value="${value}" data-key="${key}" oninput="upd('${section}','${field}',this.value)"/></div>`;
+}
+function fieldText(section, field, label, value){
+  const key = section+'.'+field;
+  return `<div class="field"><label>${label}</label>
+    <input type="text" value="${value}" data-key="${key}" oninput="upd('${section}','${field}',this.value)"/></div>`;
+}
+function fieldSelect(section, field, label, value, options){
+  const key = section+'.'+field;
+  return `<div class="field"><label>${label}</label>
+    <select data-key="${key}" onchange="upd('${section}','${field}',this.value)">
+      ${options.map(o=>`<option value="${o.v}" ${o.v===value?'selected':''}>${o.l}</option>`).join('')}
+    </select></div>`;
+}
+function checkbox(section, field, label, checked){
+  const key = 'cb-'+section+'.'+field;
+  return `<div class="checkbox-row">
+    <input type="checkbox" id="cb-${section}-${field}" data-key="${key}" ${checked?'checked':''}
+      onchange="upd('${section}','${field}',this.checked)"/>
+    <label for="cb-${section}-${field}">${label}</label></div>`;
+}
+function stampHTML(){
+  const smmlv = getSMMLV(TODAY);
+  const divisor = getDivisorHoras(TODAY);
+  const dom = getRecargoDominical(TODAY);
+  return `<div class="stamp">
+    <span><b>Vigente hoy</b>${fmtDateHuman(TODAY)}</span>
+    <span><b>SMMLV</b>${fmt0(smmlv.smmlv)}</span>
+    <span><b>Jornada</b>${JORNADA.find(j=>j.divisor===divisor).horasSemana}h/sem (÷${divisor})</span>
+    <span><b>Recargo dominical</b>${pct1(dom)}</span>
+  </div>`;
+}
+
+// ==========================================================================
+// TAB: INICIO
+// ==========================================================================
+function renderInicio(){
+  return `
+  <h1 class="page-title">Nómina Colombia</h1>
+  <p class="page-sub">Calculadora laboral y de seguridad social, construida sobre la normativa vigente. Sirve tanto para que un empleador presupueste el costo real de un cargo, como para que un empleado entienda exactamente cómo se compone su pago.</p>
+
+  <div class="card" style="border-color:var(--gold);background:var(--gold-soft);">
+    <div class="section-label" style="color:var(--gold-ink);">Aviso de uso</div>
+    <p style="margin:0;color:var(--gold-ink);font-size:13px;line-height:1.7;">
+      Esta herramienta es de <b>consulta y estudio</b>, pensada para simular y entender cómo se compone una nómina o una liquidación colombiana. <b>No tiene fines legales, contables ni de facturación electrónica</b>, no reemplaza un sistema oficial de nómina, ni la asesoría de un contador, abogado laboral o el operador de PILA. Los resultados son estimaciones basadas en la normativa general vigente; casos particulares (convenios colectivos, regímenes especiales, tipos de contrato específicos) pueden variar. Todos los cálculos se hacen en tu propio navegador — ningún dato se guarda ni se envía a ningún servidor.
+    </p>
+  </div>
+
+  <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr));">
+    ${TABS.slice(1).map(t=>`
+      <div class="card" style="margin-bottom:0;cursor:pointer;" onclick="setTab('${t.id}')">
+        <h2 style="margin-bottom:8px;">${t.label}</h2>
+        <p style="color:var(--ink-soft);font-size:13px;margin:0 0 12px;">${tabDescription(t.id)}</p>
+        <span class="btn ghost small">Abrir →</span>
+      </div>`).join('')}
+  </div>
+
+  <div class="card" style="margin-top:6px;">
+    <h2>¿Cómo funciona por dentro?</h2>
+    <p class="card-note" style="margin-bottom:12px;">Cada cálculo consulta automáticamente la tarifa legal vigente en la fecha exacta que le indiques — no solo la de hoy.</p>
+    <ul style="margin:0;padding-left:20px;color:var(--ink-soft);font-size:13.5px;line-height:1.9;">
+      <li>El <b>SMMLV y el auxilio de transporte</b> se toman del año calendario correspondiente (2016–2026).</li>
+      <li>La <b>jornada laboral</b> (y por lo tanto el valor de la hora) sigue el cronograma exacto de la Ley 2101 de 2021.</li>
+      <li>El <b>recargo dominical/festivo</b> sigue la escala progresiva de la Ley 2466 de 2025 (75% → 80% → 90% → 100%).</li>
+      <li>La <b>Liquidación con Salario Fijo</b> permite sumar varios períodos con salarios distintos, para liquidar hasta 10 años atrás con precisión.</li>
+    </ul>
+  </div>
+  `;
+}
+function tabDescription(id){
+  return ({
+    normativa:'Todas las citas y fuentes legales: SMMLV, jornada, recargos, seguridad social y prestaciones.',
+    tarifas:'Consulta el SMMLV, auxilio de transporte, jornada y recargos vigentes, hoy y en años anteriores.',
+    horarios:'Ingresa los turnos trabajados y calcula automáticamente horas extra, nocturnas y dominicales/festivas.',
+    nomina:'Simula la nómina de un período: extras, recargos, deducciones y neto a pagar. Incluye colilla imprimible.',
+    vacaciones:'Calcula el valor de vacaciones para cualquier rango de fechas, así abarque varios años.',
+    cesantias:'Calcula cesantías, intereses y prima de servicios para cualquier período.',
+    contrato:'Liquidación final de contrato, con soporte para varios años con salarios distintos.',
+    costo:'El costo mensual real de un empleado para la empresa, y cuánto reservar cada mes para su liquidación.',
+    variable:'Liquida a un empleado con ingresos variables por horas extra y recargos, usando el promedio real devengado mes a mes, como exige la ley.',
+    iaConsulta:'Arma una pregunta clara con tu contexto (salario, contrato, fechas) para consultarla con un asistente de IA.',
+    sugerencias:'¿Viste algo que se podría mejorar? Envía tu idea o reporta un error.',
+  })[id] || '';
+}
+
+// ==========================================================================
+// TAB: NORMATIVA LEGAL
+// ==========================================================================
+const NORMATIVA = [
+  { titulo:'Salario y auxilio de transporte', filas:[
+    ['SMMLV vigente','$1.750.905','Decretos 1469 y 1470 de 2025 (Mintrabajo) — incremento del 23% frente a 2025'],
+    ['Auxilio de transporte','$249.095','Ley 15 de 1959. Aplica a quienes devengan hasta 2 SMMLV'],
+    ['Tope salarial para auxilio de transporte (2 SMMLV)','$3.501.810','No aplica si el empleador suministra transporte directo'],
+    ['Tope salarial para exoneración de parafiscales (10 SMMLV)','$17.509.050','Art. 114-1 del Estatuto Tributario, Ley 1819 de 2016'],
+  ]},
+  { titulo:'Jornada laboral y horario nocturno', filas:[
+    ['Jornada máxima semanal (hasta 14 jul 2026)','44 horas (220 h/mes)','Penúltima etapa de la Ley 2101 de 2021'],
+    ['Jornada máxima semanal (desde 15 jul 2026)','42 horas (210 h/mes)','Etapa final de la reducción gradual iniciada en 2023'],
+    ['Horario de trabajo nocturno','7:00 p.m. a 6:00 a.m.','Ley 2466 de 2025, vigente desde el 25 de diciembre de 2025 (antes 9:00 p.m.)'],
+    ['Límite de horas extra','Máx. 2 h/día y 12 h/semana','Art. 167-A del CST'],
+  ]},
+  { titulo:'Recargos y horas extra', filas:[
+    ['Recargo nocturno (trabajo ordinario)','35%','Art. 168 CST'],
+    ['Hora extra diurna','+25%','Art. 168 CST'],
+    ['Hora extra nocturna','+75%','Art. 168 CST'],
+    ['Recargo dominical/festivo (1 jul 2026 – 30 jun 2027)','90%','Art. 14, Ley 2466 de 2025 (modifica art. 179 CST)'],
+    ['Recargo dominical/festivo nocturno','Recargo dominical + 35%','Se suman ambos recargos sobre la hora ordinaria'],
+  ]},
+  { titulo:'Seguridad social y parafiscales', filas:[
+    ['Salud','12.5% (8.5% empleador + 4% empleado)','Ley 100 de 1993'],
+    ['Pensión','16% (12% empleador + 4% empleado)','Ley 100 de 1993'],
+    ['Fondo de Solidaridad Pensional','1% adicional al empleado si el salario ≥ 4 SMMLV','Ley 100 de 1993, arts. 27-28'],
+    ['ARL','0.522% a 6.96% según clase de riesgo I a V','Decreto 1607 de 2002. 100% a cargo del empleador'],
+    ['Caja de Compensación Familiar','4%','Siempre obligatorio, sin exoneración'],
+    ['SENA','2%','Exonerado si el empleador es persona jurídica, o natural con 2+ trabajadores, con salario menor a 10 SMMLV'],
+    ['ICBF','3%','Misma exoneración que SENA (Art. 114-1 ET, Ley 1819 de 2016)'],
+  ]},
+  { titulo:'Prestaciones sociales y dotación', filas:[
+    ['Cesantías','8.33% mensual (1 salario/año)','Ley 50 de 1990. Consignación al fondo antes del 14 de febrero'],
+    ['Intereses a las cesantías','12% anual sobre cesantías causadas','Ley 52 de 1975. Pago directo al trabajador antes del 31 de enero'],
+    ['Prima de servicios','8.33% mensual, pago semestral','Art. 306 CST. Se paga el 30 de junio y el 20 de diciembre'],
+    ['Vacaciones','4.17% (15 días hábiles por año)','Art. 186 CST. Se liquida sobre el salario básico, sin auxilio de transporte'],
+    ['Dotación','Obligatoria si el salario ≤ 2 SMMLV','Art. 230 CST. Entrega 3 veces al año: 30 abr, 31 ago, 20 dic. El valor no está fijado por ley'],
+    ['Aguinaldo','Beneficio extralegal, opcional','No existe obligación legal; queda a discreción de cada empresa'],
+  ]},
+  { titulo:'Consecuencias de no pagar la seguridad social del trabajador', filas:[
+    ['Afiliación y pago', 'Obligatoria desde el primer día de trabajo, aunque el contrato esté en período de prueba o dure poco tiempo', 'Ley 100 de 1993 y Código Sustantivo del Trabajo (CST)'],
+    ['Responsabilidad directa del empleador', 'Si el trabajador se enferma, sufre un accidente o llega a la edad de pensión durante un período sin aportes pagados, el empleador debe asumir esos costos con su propio patrimonio (atención médica, incapacidades, pensión de invalidez), como si fuera la EPS, la ARL o el fondo de pensiones', 'Jurisprudencia laboral y de tutela; Ley 100 de 1993'],
+    ['Intereses moratorios', 'Se generan desde el primer día de atraso. La tasa exacta la calcula el operador de PILA en el momento del pago, según la metodología vigente', 'Decreto 1990 de 2016 (plazos de pago); metodología de tasas de la Superintendencia Financiera'],
+    ['Sanciones de la UGPP', 'La Unidad de Gestión Pensional y Parafiscales puede imponer multas por no afiliación o no pago, que se calculan caso por caso y pueden ser significativas', 'Art. 179, Ley 1607 de 2012'],
+    ['Ruta del trabajador afectado', 'Puede intentar un acuerdo directo con el empleador, poner en conocimiento al Ministerio del Trabajo, a la Superintendencia de Salud o de Subsidio Familiar según el caso, o presentar una demanda laboral', 'Recomendación del Ministerio del Trabajo'],
+    ['Indemnización moratoria por no pago de salarios/liquidación (distinto de la seguridad social)', '1 día de salario por cada día de mora en el pago de salarios o de la liquidación final, al terminar el contrato', 'Art. 65 CST'],
+  ]},
+  { titulo:'Liquidación con salario variable (comisiones, horas extra, recargos habituales)', filas:[
+    ['¿Cuándo aplica?', 'Cuando el ingreso mensual del trabajador cambia mes a mes por comisiones, horas extra o recargos habituales (no un pago ocasional y aislado)', 'Art. 127 CST — todo lo que se recibe como contraprestación directa del servicio es salario'],
+    ['Base para cesantías', 'Promedio de todo lo devengado (incluye horas extra, recargos y auxilio de transporte) en el último año de servicios, o en todo el tiempo si es menor a un año', 'Art. 253 CST'],
+    ['Base para prima de servicios', 'Promedio de todo lo devengado en el semestre correspondiente (enero–junio o julio–diciembre)', 'Art. 306 y 127 CST'],
+    ['Base para vacaciones', 'Promedio de lo devengado en el año anterior, pero EXCLUYENDO horas extra y el valor del trabajo en domingo/festivo; el recargo nocturno sí se incluye', 'Art. 192 CST, numerales 1 y 2'],
+    ['Intereses a las cesantías', '12% anual sobre las cesantías así calculadas (mismo promedio de salario variable)', 'Ley 52 de 1975'],
+  ]},
+];
+function renderNormativa(){
+  return `
+  <h1 class="page-title">Normativa Legal Vigente</h1>
+  <p class="page-sub">Todas las citas y fuentes que alimentan los cálculos de este sitio, actualizadas a julio de 2026.</p>
+  ${NORMATIVA.map(sec=>`
+    <div class="card">
+      <div class="section-label">${sec.titulo}</div>
+      <table>
+        <thead><tr><th>Concepto</th><th>Valor 2026</th><th>Base legal / detalle</th></tr></thead>
+        <tbody>
+          ${sec.filas.map(([c,v,b])=>`<tr><td>${c}</td><td style="font-family:var(--mono);">${v}</td><td style="color:var(--ink-soft);font-size:12px;">${b}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`).join('')}
+  <p class="note">Fuentes: Ministerio del Trabajo, Decretos 1469 y 1470 de 2025, Ley 2466 de 2025, Ley 2101 de 2021, Código Sustantivo del Trabajo (CST), Ley 100 de 1993, Ley 50 de 1990.</p>
+  `;
+}
+
+// ==========================================================================
+// TAB: CONSULTAS CON IA
+// ==========================================================================
+function updIA(field, value){
+  state.iaConsulta[field] = value;
+  state.iaConsulta.copiado = false;
+  render();
+}
+function construirPreguntaIA(){
+  const i = state.iaConsulta;
+  const lineas = [];
+  lineas.push('Tengo una pregunta sobre nómina o liquidación laboral en Colombia.');
+  lineas.push('');
+  const contexto = [];
+  if(i.salario>0) contexto.push('- Salario mensual: ' + fmt0(i.salario));
+  if(i.cargo) contexto.push('- Cargo: ' + i.cargo);
+  if(i.tipoContrato) contexto.push('- Tipo de contrato: ' + i.tipoContrato);
+  if(i.fechaInicio) contexto.push('- Fecha de ingreso: ' + fmtDateHuman(i.fechaInicio));
+  if(contexto.length){
+    lineas.push('Contexto:');
+    lineas.push(...contexto);
+    lineas.push('');
+  }
+  lineas.push('Mi pregunta es:');
+  lineas.push(i.pregunta || '(escribe aquí tu pregunta)');
+  lineas.push('');
+  lineas.push('Por favor responde considerando la normativa laboral colombiana vigente (Código Sustantivo del Trabajo, Ley 2466 de 2025, Ley 2101 de 2021, Ley 100 de 1993) y, si aplica, cita el artículo correspondiente.');
+  return lineas.join('\n');
+}
+function copiarPreguntaIA(){
+  const texto = construirPreguntaIA();
+  const marcarCopiado = () => { state.iaConsulta.copiado = true; render(); };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(texto).then(marcarCopiado).catch(()=>copiarPreguntaIAFallback(texto, marcarCopiado));
+  } else {
+    copiarPreguntaIAFallback(texto, marcarCopiado);
+  }
+}
+function copiarPreguntaIAFallback(texto, onOk){
+  try{
+    const ta = document.createElement('textarea');
+    ta.value = texto;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    if(ok) onOk();
+    else render();
+  }catch(e){
+    render();
+  }
+}
+function renderIAConsulta(){
+  const i = state.iaConsulta;
+  const preview = construirPreguntaIA();
+  return `
+  <h1 class="page-title">Consultas con IA</h1>
+  <p class="page-sub">Para dudas puntuales que ninguna calculadora resuelve directamente, arma aquí una pregunta clara con tu contexto, y cópiala para pegarla en el asistente de IA que prefieras (Claude, ChatGPT, etc.). Esta página no tiene una IA conectada — solo arma el texto por ti.</p>
+
+  <div class="card">
+    <div class="section-label">Contexto (opcional, pero ayuda a obtener una respuesta más precisa)</div>
+    <div class="grid">
+      ${fieldMoney('iaConsulta','salario','Salario mensual', i.salario)}
+      ${fieldText('iaConsulta','cargo','Cargo', i.cargo)}
+      ${fieldSelect('iaConsulta','tipoContrato','Tipo de contrato', i.tipoContrato, [
+        {v:'',l:'No especificar'},{v:'Término Indefinido',l:'Término Indefinido'},{v:'Término Fijo',l:'Término Fijo'},
+        {v:'Obra o Labor',l:'Obra o Labor'},{v:'Aprendizaje',l:'Aprendizaje'}])}
+      ${fieldDate('iaConsulta','fechaInicio','Fecha de ingreso', i.fechaInicio)}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-label">Tu pregunta</div>
+    <div class="field">
+      <textarea data-key="iaConsulta.pregunta" rows="4"
+        style="border:1px solid var(--line);border-radius:7px;padding:9px 10px;font-size:13.5px;width:100%;font-family:var(--body);"
+        oninput="updIA('pregunta',this.value)" placeholder="Ej: ¿Me deben pagar recargo dominical si mi día de descanso cambia cada semana?">${i.pregunta}</textarea>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-label">Vista previa de la pregunta</div>
+    <pre style="white-space:pre-wrap;font-family:var(--mono);font-size:12.5px;color:var(--ink-soft);background:var(--paper-alt);padding:14px;border-radius:8px;margin:0;">${preview}</pre>
+    <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+      <button class="btn gold" onclick="copiarPreguntaIA()">📋 Copiar pregunta</button>
+      <a href="https://claude.ai" target="_blank" rel="noopener" class="btn ghost">Abrir Claude.ai ↗</a>
+      ${i.copiado ? '<span class="tag green">¡Copiado! Pégalo con Ctrl+V (o Cmd+V) en tu IA</span>' : ''}
+    </div>
+  </div>
+  <p class="note">Las respuestas de cualquier IA, incluida esta plantilla, son de apoyo y estudio — no reemplazan la asesoría de un abogado laboral, un contador, o el operador de PILA para casos vinculantes.</p>
+  `;
+}
+
+// ==========================================================================
+// TAB: SUGERENCIAS
+// ==========================================================================
+function renderSugerencias(){
+  const s = state.sugerencias;
+  return `
+  <h1 class="page-title">Sugerencias</h1>
+  <p class="page-sub">¿Viste algo que se podría mejorar, un dato que parece desactualizado, o un error? Cuéntanos — tu mensaje se prepara listo para enviar directo al correo de quien mantiene esta herramienta.</p>
+  <div class="card" style="max-width:560px;">
+    <div class="grid" style="grid-template-columns:1fr 1fr;">
+      ${fieldText('sugerencias','nombre','Tu nombre (opcional)', s.nombre)}
+      ${fieldText('sugerencias','correo','Tu correo (opcional, por si quieres respuesta)', s.correo)}
+    </div>
+    <div style="margin-top:12px;">
+      ${fieldSelect('sugerencias','tipo','Tipo de sugerencia', s.tipo, [
+        {v:'Mejora',l:'Mejora o idea'},{v:'Error',l:'Encontré un error'},
+        {v:'Dato',l:'Un dato legal parece desactualizado'},{v:'Otro',l:'Otro'}])}
+    </div>
+    <div class="field" style="margin-top:14px;">
+      <label>Tu mensaje</label>
+      <textarea data-key="sugerencias.mensaje" rows="5"
+        style="border:1px solid var(--line);border-radius:7px;padding:9px 10px;font-size:13.5px;"
+        oninput="upd('sugerencias','mensaje',this.value)">${s.mensaje}</textarea>
+    </div>
+    <button class="btn gold" style="margin-top:14px;" onclick="enviarSugerencia()">Enviar sugerencia →</button>
+    <p class="note">Al hacer clic se abre tu programa de correo con el mensaje ya redactado, dirigido a <b>anacrojassz@gmail.com</b>. Si tu navegador no tiene un correo configurado, también puedes escribir directamente a esa dirección.</p>
+  </div>
+  `;
+}
+function enviarSugerencia(){
+  const s = state.sugerencias;
+  const subject = encodeURIComponent('Sugerencia — Nómina Colombia [' + s.tipo + ']');
+  const body = encodeURIComponent(
+    'Nombre: ' + (s.nombre || '(no indicado)') + '\\n' +
+    'Correo: ' + (s.correo || '(no indicado)') + '\\n' +
+    'Tipo: ' + s.tipo + '\\n\\n' +
+    'Mensaje:\\n' + (s.mensaje || '')
+  );
+  window.location.href = 'mailto:anacrojassz@gmail.com?subject=' + subject + '&body=' + body;
+}
+
+// Abre la colilla en una ventana aparte, aislada del resto de la app (sin barra lateral, sin el
+// layout flex principal), y lanza la impresión ahi. Esto evita que la disposicion de la pagina
+// completa (sidebar, tabs, etc.) interfiera con lo que el navegador intenta imprimir, que es la
+// causa mas comun de que "el boton de imprimir no funcione" o imprima algo distinto a la colilla.
+// Abre cualquier seccion de resultados en una ventana aparte, aislada del resto de la app (sin
+// barra lateral, sin el layout flex principal), y lanza la impresion ahi. Esto evita que la
+// disposicion de la pagina completa interfiera con lo que el navegador intenta imprimir. Incluye
+// automaticamente un encabezado con el titulo y la fecha, y un pie con el aviso de uso.
+function imprimirSeccion(elId, titulo, extraCss){
+  const el = document.getElementById(elId);
+  if(!el){ try{ window.print(); }catch(e){} return; }
+  try{
+    const estilos = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]')).map(n=>n.outerHTML).join('\n');
+    const ventana = window.open('', '_blank', 'width=850,height=1000');
+    if(!ventana){ try{ window.print(); }catch(e){} return; } // bloqueador de ventanas emergentes: fallback
+    const fecha = fmtDateHuman(TODAY);
+    ventana.document.open();
+    ventana.document.write(
+      '<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>' + titulo + '</title>' +
+      estilos +
+      '<style>body{background:#fff;padding:28px;margin:0;} ' +
+      '.print-wrap{max-width:900px;margin:0 auto;} ' +
+      '.print-header{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:18px;} ' +
+      '.print-header .t{font-family:var(--display);font-weight:600;font-size:21px;color:var(--ink);} ' +
+      '.print-header .d{font-family:var(--mono);font-size:12px;color:var(--ink-soft);} ' +
+      '.print-footer{margin-top:26px;padding-top:12px;border-top:1px solid var(--line);font-size:10.5px;color:var(--ink-soft);line-height:1.6;} ' +
+      '.card{border:none !important;padding:0 !important;margin-bottom:20px;} ' +
+      'input[type=text],input[type=number],input[type=date],input[type=time],select{border:none !important;background:transparent !important;padding:0 !important;font-weight:600;} ' +
+      'button{display:none !important;}' +
+      (extraCss||'') +
+      '</style></head><body><div class="print-wrap">' +
+      '<div class="print-header"><div class="t">' + titulo + '</div><div class="d">' + fecha + '</div></div>' +
+      el.outerHTML +
+      '<div class="print-footer">Documento generado con la calculadora Nómina Colombia — herramienta de consulta y estudio, sin validez legal, contable ni de facturación electrónica. No reemplaza asesoría profesional ni un sistema oficial de nómina. Diseñado y desarrollado por anacrojassz, con IA (Claude · Anthropic).</div>' +
+      '</div></body></html>'
+    );
+    ventana.document.close();
+    const lanzarImpresion = () => { try{ ventana.focus(); ventana.print(); }catch(e){} };
+    ventana.onload = lanzarImpresion;
+    setTimeout(lanzarImpresion, 350); // respaldo por si onload no se dispara a tiempo
+  }catch(e){
+    try{ window.print(); }catch(e2){}
+  }
+}
+function imprimirColilla(){ imprimirSeccion('colilla-imprimible', 'Colilla de Pago', '.card{max-width:640px;margin:0 auto !important;}'); }
+
+// ==========================================================================
+// TAB: TARIFAS
+// ==========================================================================
+function renderTarifas(){
+  return `
+  <h1 class="page-title">Tarifas Vigentes e Históricas</h1>
+  <p class="page-sub">Todos los cálculos de este sitio se alimentan de estas tablas. Referencia de consulta — no son editables aquí porque son valores fijados por ley o por decreto.</p>
+  <div class="no-print" style="margin-bottom:16px;">
+    <button class="btn ghost" onclick="imprimirSeccion('resultado-tarifas','Tarifas Vigentes e Históricas')">🖨 Imprimir esta tabla</button>
+  </div>
+  <div id="resultado-tarifas">
+
+  <div class="card">
+    <div class="section-label">Salario mínimo y auxilio de transporte, 2016–2026</div>
+    <table class="hist-table">
+      <thead><tr><th>Año</th><th class="num">SMMLV</th><th class="num">Auxilio de transporte</th><th class="num">Tope aux. (2 SMMLV)</th></tr></thead>
+      <tbody>
+        ${HISTORICO_SMMLV.slice().reverse().map(r=>`
+          <tr ${r.year===new Date().getFullYear()?'style="background:var(--gold-soft)"':''}>
+            <td>${r.year}${r.year===new Date().getFullYear()?' <span class="tag gold">vigente</span>':''}</td>
+            <td class="num">${fmt0(r.smmlv)}</td>
+            <td class="num">${fmt0(r.aux)}</td>
+            <td class="num">${fmt0(r.smmlv*2)}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+    <p class="note">Fuente: Ministerio del Trabajo, decretos anuales de salario mínimo (1990–2026).</p>
+  </div>
+
+  <div class="card">
+    <div class="section-label">Jornada laboral — Ley 2101 de 2021 (reducción gradual)</div>
+    <table class="hist-table">
+      <thead><tr><th>Vigente desde</th><th>Vigente hasta</th><th class="num">Horas / semana</th><th class="num">Divisor mensual</th></tr></thead>
+      <tbody>
+        ${JORNADA.map(r=>`<tr ${TODAY>=r.desde&&TODAY<=r.hasta?'style="background:var(--gold-soft)"':''}>
+          <td>${fmtDateHuman(r.desde)}</td><td>${r.hasta==='2099-12-31'?'—':fmtDateHuman(r.hasta)}</td>
+          <td class="num">${r.horasSemana}h</td><td class="num">${r.divisor}</td></tr>`).join('')}
+      </tbody>
+    </table>
+    <p class="note">Valor hora ordinaria = Salario ÷ divisor mensual. El divisor baja a 210 horas a partir del 15 de julio de 2026.</p>
+  </div>
+
+  <div class="card">
+    <div class="section-label">Recargo dominical / festivo — Ley 2466 de 2025 (escala progresiva)</div>
+    <table class="hist-table">
+      <thead><tr><th>Vigente desde</th><th>Vigente hasta</th><th class="num">Recargo</th></tr></thead>
+      <tbody>
+        ${DOMINICAL.map(r=>`<tr ${TODAY>=r.desde&&TODAY<=r.hasta?'style="background:var(--gold-soft)"':''}>
+          <td>${fmtDateHuman(r.desde)}</td><td>${r.hasta==='2099-12-31'?'—':fmtDateHuman(r.hasta)}</td>
+          <td class="num">${pct1(r.pct)}</td></tr>`).join('')}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr));">
+    <div class="card" style="margin-bottom:0;">
+      <div class="section-label">Recargos y horas extra fijos</div>
+      <table><tbody>
+        <tr><td>Recargo nocturno (7 p.m.–6 a.m.)</td><td class="num">35%</td></tr>
+        <tr><td>Hora extra diurna</td><td class="num">+25%</td></tr>
+        <tr><td>Hora extra nocturna</td><td class="num">+75%</td></tr>
+      </tbody></table>
+    </div>
+    <div class="card" style="margin-bottom:0;">
+      <div class="section-label">Seguridad social (sobre IBC)</div>
+      <table><tbody>
+        <tr><td>Salud</td><td class="num">4% + 8.5%</td></tr>
+        <tr><td>Pensión</td><td class="num">4% + 12%</td></tr>
+        <tr><td>ARL (clase I a V)</td><td class="num">0.522% – 6.96%</td></tr>
+        <tr><td>Caja de Compensación</td><td class="num">4%</td></tr>
+        <tr><td>SENA / ICBF</td><td class="num">2% / 3%</td></tr>
+      </tbody></table>
+    </div>
+    <div class="card" style="margin-bottom:0;">
+      <div class="section-label">Prestaciones sociales</div>
+      <table><tbody>
+        <tr><td>Cesantías</td><td class="num">8.33%</td></tr>
+        <tr><td>Intereses a las cesantías</td><td class="num">12% anual</td></tr>
+        <tr><td>Prima de servicios</td><td class="num">8.33%</td></tr>
+        <tr><td>Vacaciones</td><td class="num">4.17%</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+
+  </div>
+  `;
+}
+
+// ==========================================================================
+// TAB: TURNOS Y HORARIOS (novedades automáticas desde horarios trabajados)
+// ==========================================================================
+const DIAS_LABEL = { lun:'Lunes', mar:'Martes', mie:'Miércoles', jue:'Jueves', vie:'Viernes', sab:'Sábado', dom:'Domingo' };
+function renderHorarios(){
+  const lista = state.turnos.lista;
+  const jornada = state.turnos.jornadaOrdinariaDiaria;
+  const { detalle, tot } = calcularTotalesTurnos(lista, jornada);
+  const extrasTotal = tot.heDiurnas+tot.heNocturnas+tot.heDomDiurnas+tot.heDomNocturnas+tot.recNocturno+tot.recDomDiurno+tot.recDomNocturno;
+  const g = state.turnos.generador;
+  const sim = state.turnos.simHorario;
+  const horaSalidaSim = calcularHoraSalida(sim.horaIngreso, sim.horasTrabajo, sim.almuerzoMin);
+  const horasSemanales = state.turnos.horasOrdinariasSemanales;
+  const diasLaborales = state.turnos.diasLaboralesSemana;
+  const diaCorto = hayDiaCorto();
+  const horasEntreSemana = state.turnos.horasEntreSemana;
+  const horasDiaCorto = horasDiaCortoCalculada();
+  const diasCortosN = diasCortosCount();
+  const jornadaCalcDecimal = jornadaDiariaCalculada();
+  const jornadaCalcTexto = horasATexto(jornadaCalcDecimal);
+
+  return `
+  <h1 class="page-title">Turnos y Horarios</h1>
+  <p class="page-sub">Genera automáticamente los turnos de un período completo a partir de un horario semanal, o agrégalos uno por uno. El sistema identifica domingos y festivos, descuenta el almuerzo, y separa solas las horas ordinarias de las extra según el umbral diario que definas.</p>
+
+  <div class="card">
+    <div class="section-label">1. Días laborados y horas semanales</div>
+    <div class="grid">
+      <div class="field"><label>Días laborados por semana</label>
+        <input type="number" step="1" min="1" max="7" value="${diasLaborales}" data-key="turnos.diasLaboralesSemana"
+          oninput="updDiasLaboralesSemana(this.value)"/></div>
+      <div class="field"><label>Horas ordinarias semanales (jornada legal actual: 42)</label>
+        <input type="number" step="0.5" value="${horasSemanales}" data-key="turnos.horasOrdinariasSemanales"
+          oninput="updHorasOrdinariasSemanales(this.value)"/></div>
+      ${diaCorto
+        ? `<div class="field"><label>Horas entre semana (lunes a viernes, por día)</label>
+             <input type="number" step="0.1" value="${horasEntreSemana}" data-key="turnos.horasEntreSemana"
+               oninput="updHorasEntreSemana(this.value)"/></div>`
+        : ''}
+    </div>
+    ${diaCorto ? `
+    <div class="result-strip" style="margin-top:12px;">
+      <div class="result-box"><div class="k">Horas entre semana (c/día)</div><div class="v">${horasEntreSemana.toFixed(2)}</div></div>
+      <div class="result-box total"><div class="k">Horas el ${diasCortosN>1?'resto de días':'sábado'} (para completar)</div><div class="v">${horasDiaCorto.toFixed(2)}</div></div>
+    </div>
+    <p class="note">Con ${diasLaborales} días laborados y ${horasSemanales} horas ordinarias semanales: los primeros 5 días (lunes a viernes) trabajan ${horasEntreSemana} horas cada uno (${(horasEntreSemana*5).toFixed(2)} horas en total), y ${diasCortosN>1? 'los '+diasCortosN+' días restantes se reparten':'el día restante (normalmente el sábado) absorbe'} las <b>${horasSemanales} − ${(horasEntreSemana*5).toFixed(2)} = ${(horasSemanales-horasEntreSemana*5).toFixed(2)} horas que faltan</b>${diasCortosN>1?` (${horasDiaCorto.toFixed(2)} horas cada uno)`:''} para completar la jornada legal, sin necesidad de pagarlas como hora extra.${(horasSemanales-horasEntreSemana*5)<0?' <b>Atención:</b> con esas horas entre semana ya se supera el total semanal permitido — revisa los valores.':''}</p>
+    ` : `
+    <p class="note">Repartiendo las ${horasSemanales} horas semanales entre los ${diasLaborales} días laborales, el resultado es <b>${jornadaCalcDecimal.toFixed(2)} horas por día (${jornadaCalcTexto})</b> — el ".${String(jornadaCalcDecimal.toFixed(2)).split('.')[1]}" es la parte de hora expresada en decimales; por ejemplo 8.4 horas son 8 horas y 24 minutos (0.4 × 60 = 24). Si trabajan 6 días a la semana, activa esa opción arriba para repartir las horas de forma realista (jornada fija entre semana y un día más corto, típicamente el sábado) en vez de un promedio parejo.</p>
+    `}
+    <div class="grid" style="margin-top:10px;">
+      <div class="field"><label>Horas ordinarias por turno antes de que empiecen las horas extra (umbral, se actualiza solo)</label>
+        <input type="number" step="0.01" value="${jornada}" data-key="turnos.jornadaOrdinariaDiaria"
+          oninput="updJornadaOrdinaria(this.value)"/></div>
+    </div>
+    <p class="note">Dentro de cada turno, las primeras ${jornada} horas trabajadas se consideran ordinarias — solo generan recargo si caen en horario nocturno (7 p.m.–6 a.m.) o en domingo/festivo. Todo lo que exceda ese umbral se calcula como hora extra, con el recargo de ley correspondiente (25% diurna, 75% nocturna, y más si además es dominical/festiva).</p>
+  </div>
+
+  <div class="card">
+    <div class="section-label">2. Simulador de horario — de la hora de ingreso a la hora de salida</div>
+    <p class="card-note">Ya sabiendo cuántas horas se trabajan cada día (sección anterior), solo falta la hora de ingreso y el tiempo de almuerzo para calcular la hora de salida.</p>
+    <div class="grid">
+      <div class="field"><label>Hora de ingreso</label>
+        <input type="time" value="${sim.horaIngreso}" data-key="simHorario.horaIngreso"
+          oninput="updSimHorario('horaIngreso',this.value)"/></div>
+      <div class="field"><label>Horas a trabajar ese día</label>
+        <input type="number" step="0.5" value="${sim.horasTrabajo}" data-key="simHorario.horasTrabajo"
+          oninput="updSimHorario('horasTrabajo',parseFloat(this.value)||0)"/></div>
+      <div class="field"><label>Inicio del almuerzo</label>
+        <input type="time" value="${sim.almuerzoInicio}" data-key="simHorario.almuerzoInicio"
+          oninput="updSimHorario('almuerzoInicio',this.value)"/></div>
+      <div class="field"><label>Duración del almuerzo</label>
+        <select data-key="simHorario.almuerzoMin" onchange="updSimHorario('almuerzoMin',parseInt(this.value,10))">
+          ${[0,30,45,60,90,120].map(m=>`<option value="${m}" ${sim.almuerzoMin===m?'selected':''}>${m===0?'Sin descanso':m+' min'}</option>`).join('')}
+        </select></div>
+    </div>
+    <div style="margin-top:8px;">
+      ${diaCorto
+        ? `<button class="btn ghost small" onclick="updSimHorario('horasTrabajo',${horasEntreSemana})">Usar horas entre semana (${horasEntreSemana.toFixed(2)})</button>
+           <button class="btn ghost small" style="margin-left:6px;" onclick="updSimHorario('horasTrabajo',${horasDiaCorto})">Usar horas del día corto (${horasDiaCorto.toFixed(2)})</button>`
+        : `<button class="btn ghost small" onclick="updSimHorario('horasTrabajo',${jornadaCalcDecimal})">Usar horas por día calculadas (${jornadaCalcDecimal.toFixed(2)})</button>`}
+    </div>
+    <div class="result-box" style="margin-top:12px;max-width:260px;">
+      <div class="k">Hora de salida calculada</div>
+      <div class="v">${horaSalidaSim.horaTexto}${horaSalidaSim.cruzaMedianoche?' (día siguiente)':''}</div>
+    </div>
+    <p class="card-note" style="margin:12px 0 6px;">¿A qué días aplicar este horario?</p>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;">
+      ${['lun','mar','mie','jue','vie','sab','dom'].map(k=>`
+        <div class="checkbox-row">
+          <input type="checkbox" id="simd-${k}" data-key="simHorario.dias.${k}" ${sim.dias[k]?'checked':''}
+            onchange="updSimHorarioDia('${k}',this.checked)"/>
+          <label for="simd-${k}">${DIAS_LABEL[k]}</label>
+        </div>`).join('')}
+    </div>
+    <button class="btn gold" style="margin-top:14px;" onclick="aplicarSimHorarioAlPatron()">Aplicar este horario a los días marcados →</button>
+    <p class="note">Al aplicar, esos días quedan marcados como "trabaja" en el patrón de abajo, con esta hora de ingreso, la hora de salida calculada, y este almuerzo. Corre el simulador de nuevo con otros valores (por ejemplo, las horas del día corto y sin almuerzo) y aplícalo solo al sábado para tener un horario distinto ese día.</p>
+  </div>
+
+  <div class="card">
+    <div class="section-label">3. Generar turnos automáticamente para un período</div>
+    <div class="grid">
+      <div class="field"><label>Fecha inicio del período</label>
+        <input type="date" value="${g.fechaInicio}" data-key="turnos.generador.fechaInicio"
+          oninput="updGenerador('fechaInicio',this.value)"/></div>
+      <div class="field"><label>Fecha fin del período</label>
+        <input type="date" value="${g.fechaFin}" data-key="turnos.generador.fechaFin"
+          oninput="updGenerador('fechaFin',this.value)"/></div>
+    </div>
+    <button class="btn ghost small" style="margin-top:8px;" onclick="setMesCompleto()">Usar el mes completo</button>
+
+    <div class="hr"></div>
+    <p class="card-note" style="margin-bottom:10px;">Horario habitual por día de la semana (usa formato 24 horas; por ejemplo, medianoche es 00:00). Puedes editarlo aquí directamente, o generarlo con el simulador de arriba.</p>
+    <table>
+      <thead><tr><th>Día</th><th>¿Trabaja?</th><th>Hora entrada</th><th>Hora salida</th><th>Inicio almuerzo</th><th>Almuerzo</th></tr></thead>
+      <tbody>
+        ${['lun','mar','mie','jue','vie','sab','dom'].map(k=>{
+          const cfg = g.patron[k];
+          const dis = cfg.activo ? '' : 'disabled';
+          return `<tr>
+            <td>${DIAS_LABEL[k]}</td>
+            <td style="text-align:center;">
+              <input type="checkbox" data-key="patron.${k}.activo" ${cfg.activo?'checked':''}
+                onchange="updPatronDia('${k}','activo',this.checked)"/>
+            </td>
+            <td><input type="time" value="${cfg.inicio}" data-key="patron.${k}.inicio" ${dis}
+                oninput="updPatronDia('${k}','inicio',this.value)"/></td>
+            <td><input type="time" value="${cfg.fin}" data-key="patron.${k}.fin" ${dis}
+                oninput="updPatronDia('${k}','fin',this.value)"/></td>
+            <td><input type="time" value="${cfg.almuerzoInicio}" data-key="patron.${k}.almuerzoInicio" ${dis}
+                oninput="updPatronDia('${k}','almuerzoInicio',this.value)"/></td>
+            <td>
+              <select data-key="patron.${k}.almuerzoMin" ${dis} onchange="updPatronDia('${k}','almuerzoMin',parseInt(this.value,10))">
+                ${[0,30,45,60,90,120].map(m=>`<option value="${m}" ${cfg.almuerzoMin===m?'selected':''}>${m===0?'Sin descanso':m+' min'}</option>`).join('')}
+              </select>
+            </td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+
+    <button class="btn gold" style="margin-top:14px;" onclick="generarTurnosDesdePatron()">Generar turnos para este período →</button>
+    <p class="note">Esto reemplaza la lista de turnos de abajo con un día por cada fecha del período: los días marcados como "trabaja" quedan con su horario, y los demás quedan marcados como "Descanso" (se pagan como día ordinario, sin horas ni recargos) — así puedes revisar el período completo de un vistazo y ajustar cualquier día puntual después. Si un empleado no tiene horario fijo, puedes ignorar esta sección y agregar los turnos manualmente uno por uno.</p>
+  </div>
+
+  <div class="card">
+    <div class="section-label">4. Turnos del período</div>
+    <table>
+      <thead><tr>
+        <th>Fecha</th><th>Hora entrada</th><th>Hora salida</th>
+        <th>Inicio almuerzo</th><th>Almuerzo</th>
+        <th>Descanso<br/><span style="font-weight:400;text-transform:none;">(paga como día ordinario)</span></th>
+        <th>Día no habitual<br/><span style="font-weight:400;text-transform:none;">(todo extra)</span></th>
+        <th>Día</th><th class="num">Horas pagadas</th><th></th>
+      </tr></thead>
+      <tbody>
+        ${lista.map((t,i)=>{
+          const festivo = esDomingoOFestivo(t.fecha);
+          const r = detalle[i];
+          const dis = t.esDescanso ? 'disabled' : '';
+          return `<tr${t.esDescanso?' style="background:var(--paper-alt);"':''}>
+            <td><input type="date" value="${t.fecha}" data-key="turnos.${i}.fecha" oninput="updTurno(${i},'fecha',this.value)"/></td>
+            <td><input type="time" value="${t.horaInicio}" data-key="turnos.${i}.horaInicio" ${dis} oninput="updTurno(${i},'horaInicio',this.value)"/></td>
+            <td><input type="time" value="${t.horaFin}" data-key="turnos.${i}.horaFin" ${dis} oninput="updTurno(${i},'horaFin',this.value)"/></td>
+            <td><input type="time" value="${t.almuerzoInicio||'12:00'}" data-key="turnos.${i}.almuerzoInicio" ${dis} oninput="updTurno(${i},'almuerzoInicio',this.value)"/></td>
+            <td>
+              <select data-key="turnos.${i}.almuerzoMin" ${dis} onchange="updTurno(${i},'almuerzoMin',this.value)">
+                ${[0,30,45,60,90,120].map(m=>`<option value="${m}" ${((t.almuerzoMin||0)===m)?'selected':''}>${m===0?'Sin descanso':m+' min'}</option>`).join('')}
+              </select>
+            </td>
+            <td style="text-align:center;">
+              <input type="checkbox" data-key="turnos.${i}.esDescanso" ${t.esDescanso?'checked':''}
+                onchange="updTurno(${i},'esDescanso',this.checked)"/>
+            </td>
+            <td style="text-align:center;">
+              <input type="checkbox" data-key="turnos.${i}.diaNoHabitual" ${t.diaNoHabitual?'checked':''} ${dis}
+                onchange="updTurno(${i},'diaNoHabitual',this.checked)"/>
+            </td>
+            <td>${t.esDescanso?'<span class="tag grey">Descanso</span>':(festivo?'<span class="tag gold">Dom/Festivo</span>':'<span class="tag green">Hábil</span>')}</td>
+            <td class="num">${r.totalHoras.toFixed(2)}</td>
+            <td style="white-space:nowrap;">
+              <button class="btn ghost small" title="Copiar este horario a las demás filas" onclick="aplicarHorarioATodos(${i})">↧ A todas</button>
+              <button class="btn ghost small" title="Duplicar esta fila al día siguiente" onclick="duplicarTurno(${i})">⧉</button>
+              ${lista.length>1?`<button class="btn danger small" onclick="removeTurno(${i})">✕</button>`:''}
+            </td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+    <button class="btn ghost" style="margin-top:12px;" onclick="addTurno()">+ Agregar turno manualmente</button>
+    <p class="note">El tiempo de almuerzo se descuenta y no genera pago. Marca <b>"Descanso"</b> en el día de descanso semanal remunerado (o cualquier día que se paga sin trabajarlo) — ese día no genera horas ni recargos, se paga como un día ordinario dentro del salario mensual. Marca <b>"Día no habitual"</b> solo cuando el turno completo fue adicional al horario normal del empleado (por ejemplo, lo llamaron un día libre) — en ese caso todas sus horas se calculan como extra, sin aplicar el umbral de horas ordinarias. El botón <b>"↧ A todas"</b> copia el horario de esa fila a todas las demás filas trabajadas (útil si casi todos los días tienen el mismo horario); el botón <b>"⧉"</b> duplica la fila al día siguiente, para que solo tengas que ajustar la fecha si cambia algo puntual.</p>
+  </div>
+
+  <div id="resultado-horarios" class="card">
+    <div class="section-label">Totales del período — listos para el Simulador de Nómina</div>
+    <table>
+      <tbody>
+        <tr><td>Horas extra diurnas</td><td class="num">${tot.heDiurnas.toFixed(2)}</td></tr>
+        <tr><td>Horas extra nocturnas</td><td class="num">${tot.heNocturnas.toFixed(2)}</td></tr>
+        <tr><td>Horas extra dominicales/festivas diurnas</td><td class="num">${tot.heDomDiurnas.toFixed(2)}</td></tr>
+        <tr><td>Horas extra dominicales/festivas nocturnas</td><td class="num">${tot.heDomNocturnas.toFixed(2)}</td></tr>
+        <tr><td>Horas de recargo nocturno ordinario</td><td class="num">${tot.recNocturno.toFixed(2)}</td></tr>
+        <tr><td>Horas de recargo dominical/festivo diurno</td><td class="num">${tot.recDomDiurno.toFixed(2)}</td></tr>
+        <tr><td>Horas de recargo dominical/festivo nocturno</td><td class="num">${tot.recDomNocturno.toFixed(2)}</td></tr>
+        <tr class="total"><td>Total de horas con algún tipo de recargo o extra</td><td class="num">${extrasTotal.toFixed(2)}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="no-print">
+    <button class="btn ghost small" onclick="imprimirSeccion('resultado-horarios','Totales de Turnos y Horarios')">🖨 Imprimir estos totales</button>
+    <button class="btn gold" onclick="aplicarTurnosASimulador()">Aplicar estos totales al Simulador de Nómina →</button>
+  </div>
+  `;
+}
+
+// ==========================================================================
+// TAB: SIMULADOR DE NOMINA
+// ==========================================================================
+function renderNomina(){
+  const s = state.simulador;
+  const salarioEfectivo = s.modoPago==='jornal' ? Math.round((s.jornalValor||0)*30) : s.salario;
+  const r = liquidarPeriodo({
+    salario:salarioEfectivo, fecha:s.fecha, diasLaborados:s.dias, recibeAux:s.recibeAux,
+    heDiurnas:s.heDiurnas, heNocturnas:s.heNocturnas, heDomDiurnas:s.heDomDiurnas, heDomNocturnas:s.heDomNocturnas,
+    recNocturno:s.recNocturno, recDomDiurno:s.recDomDiurno, recDomNocturno:s.recDomNocturno,
+    bonificaciones:s.bonificaciones, prestamos:s.prestamos, otrosDescuentos:s.otrosDescuentos,
+    exoneradoParafiscales:s.exonerado, claseRiesgo:s.claseRiesgo,
+  });
+
+  if(s.vista==='colilla') return renderColilla(s, r);
+
+  const rows = [
+    ['Salario devengado (proporcional)', r.salarioDevengado, '—', '—'],
+    ['Auxilio de transporte', r.auxProporcional, '—', '—'],
+    ['Horas extra diurnas (25%)', r.valorHeDiurnas, s.heDiurnas, s.heDiurnas? r.valorHeDiurnas/s.heDiurnas : null],
+    ['Horas extra nocturnas (75%)', r.valorHeNocturnas, s.heNocturnas, s.heNocturnas? r.valorHeNocturnas/s.heNocturnas : null],
+    ['H.E. dominicales/festivas diurnas', r.valorHeDomDiurnas, s.heDomDiurnas, s.heDomDiurnas? r.valorHeDomDiurnas/s.heDomDiurnas : null],
+    ['H.E. dominicales/festivas nocturnas', r.valorHeDomNocturnas, s.heDomNocturnas, s.heDomNocturnas? r.valorHeDomNocturnas/s.heDomNocturnas : null],
+    ['Recargo nocturno ordinario (35%)', r.valorRecNocturno, s.recNocturno, s.recNocturno? r.valorRecNocturno/s.recNocturno : null],
+    ['Recargo dominical/festivo diurno', r.valorRecDomDiurno, s.recDomDiurno, s.recDomDiurno? r.valorRecDomDiurno/s.recDomDiurno : null],
+    ['Recargo dominical/festivo nocturno', r.valorRecDomNocturno, s.recDomNocturno, s.recDomNocturno? r.valorRecDomNocturno/s.recDomNocturno : null],
+    ['Bonificaciones', r.bonificaciones, '—', '—'],
+  ];
+
+  return `
+  <h1 class="page-title">Simulador de Nómina</h1>
+  <p class="page-sub">Calcula un período de pago completo usando la tarifa legal vigente en la fecha indicada. Sirve tanto para presupuestar como para verificar una nómina ya pagada.</p>
+
+  <div class="card">
+    <div class="section-label">Datos del empleado (opcional — quedan como soporte de esta liquidación)</div>
+    <div class="grid">
+      ${fieldText('simulador','empleado','Nombre del empleado', s.empleado)}
+      ${fieldText('simulador','cedula','Cédula', s.cedula)}
+      ${fieldText('simulador','cargo','Cargo', s.cargo)}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-label">Datos del período</div>
+    <div class="grid">
+      <div class="field"><label>Tipo de pago</label>
+        <select data-key="simulador.modoPago" onchange="upd('simulador','modoPago',this.value)">
+          <option value="mensual" ${s.modoPago==='mensual'?'selected':''}>Salario mensual fijo</option>
+          <option value="jornal" ${s.modoPago==='jornal'?'selected':''}>Pago por día trabajado (jornal)</option>
+        </select></div>
+      ${s.modoPago==='jornal'
+        ? fieldMoney('simulador','jornalValor','Valor del jornal (pago por cada día trabajado)', s.jornalValor)
+        : fieldMoney('simulador','salario','Salario básico mensual', s.salario)}
+      ${fieldDate('simulador','fecha','Fecha del período (fecha de pago)', s.fecha)}
+      ${fieldNumber('simulador','dias','Días laborados', s.dias)}
+      ${fieldSelect('simulador','claseRiesgo','Clase de riesgo ARL', s.claseRiesgo,[{v:'I',l:'I — 0.522%'},{v:'II',l:'II — 1.044%'},{v:'III',l:'III — 2.436%'},{v:'IV',l:'IV — 4.35%'},{v:'V',l:'V — 6.96%'}])}
+    </div>
+    <div style="display:flex;gap:24px;flex-wrap:wrap;margin-top:6px;">
+      ${checkbox('simulador','recibeAux','Recibe auxilio de transporte', s.recibeAux)}
+      ${checkbox('simulador','exonerado','Empleador exonerado de parafiscales (Art. 114-1 ET)', s.exonerado)}
+    </div>
+    ${s.modoPago==='jornal' ? `<p class="note">Con un jornal de ${fmt0(s.jornalValor)}, el salario mensual equivalente es ${fmt0(salarioEfectivo)} (jornal × 30) — con ese valor se calcula proporcionalmente el auxilio de transporte, las deducciones y los aportes, igual que con un salario fijo.</p>` : ''}
+  </div>
+
+  <div class="card">
+    <div class="section-label">Simulador de aportes no pagados (seguridad social)</div>
+    <div class="grid">
+      ${fieldMoney('mora','salario','Salario mensual base', state.mora.salario)}
+      ${fieldNumber('mora','mesesMora','Meses sin pagar aportes', state.mora.mesesMora)}
+      ${fieldSelect('mora','claseRiesgo','Clase de riesgo ARL', state.mora.claseRiesgo,[{v:'I',l:'I — 0.522%'},{v:'II',l:'II — 1.044%'},{v:'III',l:'III — 2.436%'},{v:'IV',l:'IV — 4.35%'},{v:'V',l:'V — 6.96%'}])}
+      <div class="field"><label>Tasa de interés moratorio mensual estimada (%)</label>
+        <input type="number" step="0.1" value="${(state.mora.tasaMoraMensual*100).toFixed(1)}" data-key="mora.tasaMoraMensual"
+          oninput="upd('mora','tasaMoraMensual',this.value/100,'number')"/></div>
+    </div>
+    ${(()=>{ const rm = calcularMoraSeguridadSocial(state.mora); return `
+    <table style="margin-top:12px;">
+      <tbody>
+        <tr><td>Aportes mensuales que debieron pagarse (salud + pensión + ARL + parafiscales, empleado y empleador)</td><td class="num">${fmt0(rm.aportesMensuales)}</td></tr>
+        <tr><td>Total de aportes no pagados en ${state.mora.mesesMora} mes(es)</td><td class="num">${fmt0(rm.totalAportes)}</td></tr>
+        <tr><td>Interés moratorio estimado</td><td class="num">${fmt0(rm.interesEstimado)}</td></tr>
+        <tr class="total"><td>Total estimado que el empleador tendría que asumir</td><td class="num">${fmt0(rm.totalEstimado)}</td></tr>
+      </tbody>
+    </table>`; })()}
+    <p class="note">Esta es una estimación de referencia, no un cálculo legal ni actuarial exacto. Además de este valor, si el empleado se enferma, sufre un accidente laboral o llega a la edad de pensión durante un período sin aportes pagados, el empleador debe asumir directamente esos costos (atención médica, incapacidades, pensión de invalidez) con su propio patrimonio, como si fuera la EPS, la ARL o el fondo de pensiones. La UGPP puede además imponer sanciones independientes de este cálculo. La tasa de interés moratorio real la calcula el operador de PILA al momento del pago — verifica el valor exacto ahí antes de negociar o presupuestar. Ver la pestaña Normativa Legal para el detalle y las fuentes.</p>
+  </div>
+
+  <div class="card">
+    <div class="section-label">Horas extra y recargos del período</div>
+    <div class="grid">
+      ${fieldNumber('simulador','heDiurnas','H.E. diurnas (h)', s.heDiurnas, {step:0.5})}
+      ${fieldNumber('simulador','heNocturnas','H.E. nocturnas (h)', s.heNocturnas, {step:0.5})}
+      ${fieldNumber('simulador','heDomDiurnas','H.E. dom/fest diurnas (h)', s.heDomDiurnas, {step:0.5})}
+      ${fieldNumber('simulador','heDomNocturnas','H.E. dom/fest nocturnas (h)', s.heDomNocturnas, {step:0.5})}
+      ${fieldNumber('simulador','recNocturno','Recargo nocturno ordinario (h)', s.recNocturno, {step:0.5})}
+      ${fieldNumber('simulador','recDomDiurno','Recargo dom/fest diurno (h)', s.recDomDiurno, {step:0.5})}
+      ${fieldNumber('simulador','recDomNocturno','Recargo dom/fest nocturno (h)', s.recDomNocturno, {step:0.5})}
+      ${fieldMoney('simulador','bonificaciones','Bonificaciones ($)', s.bonificaciones)}
+      ${fieldMoney('simulador','prestamos','Préstamos ($)', s.prestamos)}
+      ${fieldMoney('simulador','otrosDescuentos','Otros descuentos ($)', s.otrosDescuentos)}
+    </div>
+  </div>
+
+  <div id="resultado-nomina">
+  <div class="card">
+    <div class="section-label">Devengados — horas, tarifa y valor</div>
+    <table>
+      <thead><tr><th>Concepto</th><th class="num">Horas</th><th class="num">Valor hora aplicado</th><th class="num">Valor total</th></tr></thead>
+      <tbody>
+        ${rows.map(([lab,val,hrs,vh])=>`<tr>
+          <td>${lab}</td>
+          <td class="num">${hrs===null||hrs==='—'?'—':hrs}</td>
+          <td class="num">${vh===null||vh===undefined?'—':fmt2(vh)}</td>
+          <td class="num">${fmt0(val)}</td>
+        </tr>`).join('')}
+        <tr class="total"><td colspan="3">TOTAL DEVENGADO</td><td class="num">${fmt0(r.totalDevengado)}</td></tr>
+      </tbody>
+    </table>
+    <p class="note">Tarifa vigente el ${fmtDateHuman(s.fecha)}: SMMLV ${fmt0(r.smmlv)} · divisor ${r.divisor}h · valor hora ${fmt2(r.valorHora)} · recargo dominical ${pct1(r.pctDom)}.</p>
+  </div>
+
+  <div class="card">
+    <div class="section-label">Deducciones del empleado</div>
+    <table>
+      <tbody>
+        <tr><td>Aporte a salud (4%)</td><td class="num">${fmt0(r.dedSalud)}</td></tr>
+        <tr><td>Aporte a pensión (4%)</td><td class="num">${fmt0(r.dedPension)}</td></tr>
+        <tr><td>Préstamos</td><td class="num">${fmt0(r.prestamos)}</td></tr>
+        <tr><td>Otros descuentos</td><td class="num">${fmt0(r.otrosDescuentos)}</td></tr>
+        <tr class="total"><td>TOTAL DEDUCCIONES</td><td class="num">${fmt0(r.totalDeducciones)}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="result-strip">
+    <div class="result-box neto"><div class="k">Neto a pagar</div><div class="v">${fmt0(r.neto)}</div></div>
+    <div class="result-box"><div class="k">Aportes del empleador</div><div class="v">${fmt0(r.totalAportes)}</div></div>
+    <div class="result-box total"><div class="k">Costo total del período</div><div class="v">${fmt0(r.costoTotalPeriodo)}</div></div>
+  </div>
+  </div>
+
+  <div class="no-print" style="margin-top:18px;">
+    <button class="btn ghost" onclick="imprimirSeccion('resultado-nomina','Simulación de Nómina')">🖨 Imprimir este resultado</button>
+    <button class="btn gold" style="margin-left:8px;" onclick="upd('simulador','vista','colilla')">Ver colilla de pago imprimible →</button>
+  </div>
+  `;
+}
+
+function renderColilla(s, r){
+  const dev = [
+    ['Salario devengado (proporcional)', null, r.salarioDevengado],
+    ['Auxilio de transporte', null, r.auxProporcional],
+    ['Horas extra diurnas (25%)', s.heDiurnas, r.valorHeDiurnas],
+    ['Horas extra nocturnas (75%)', s.heNocturnas, r.valorHeNocturnas],
+    ['H.E. dominicales/festivas diurnas', s.heDomDiurnas, r.valorHeDomDiurnas],
+    ['H.E. dominicales/festivas nocturnas', s.heDomNocturnas, r.valorHeDomNocturnas],
+    ['Recargo nocturno ordinario (35%)', s.recNocturno, r.valorRecNocturno],
+    ['Recargo dominical/festivo diurno', s.recDomDiurno, r.valorRecDomDiurno],
+    ['Recargo dominical/festivo nocturno', s.recDomNocturno, r.valorRecDomNocturno],
+    ['Bonificaciones', null, r.bonificaciones],
+  ];
+  const extrasTotal = r.valorHeDiurnas+r.valorHeNocturnas+r.valorHeDomDiurnas+r.valorHeDomNocturnas+r.valorRecNocturno+r.valorRecDomDiurno+r.valorRecDomNocturno;
+  return `
+  <div class="no-print" style="margin-bottom:18px;">
+    <button class="btn ghost" onclick="upd('simulador','vista','detalle')">← Volver al detalle</button>
+    <button class="btn gold" style="margin-left:8px;" onclick="imprimirColilla()">Imprimir colilla</button>
+  </div>
+  <div class="card" id="colilla-imprimible" style="max-width:640px;position:relative;overflow:hidden;">
+    <div class="watermark-doc">ACRS</div>
+    <div style="position:relative;z-index:1;">
+    <div class="grid" style="grid-template-columns:1fr 1fr;margin-bottom:16px;">
+      ${fieldText('simulador','empresa','Nombre o razón social de la empresa', s.empresa)}
+      ${fieldText('simulador','nit','NIT', s.nit)}
+      ${fieldText('simulador','empleado','Nombre del empleado', s.empleado)}
+      ${fieldText('simulador','cedula','Cédula', s.cedula)}
+      ${fieldText('simulador','cargo','Cargo', s.cargo)}
+    </div>
+    <hr class="hr"/>
+    <h2 style="margin-bottom:2px;">Colilla de Pago</h2>
+    <p class="card-note">Período: ${fmtDateHuman(s.fecha)} · ${s.dias} días laborados</p>
+
+    <div class="section-label">Devengados — detalle de horas y valor pagado</div>
+    <table>
+      <thead><tr><th>Concepto</th><th class="num">Horas</th><th class="num">Valor</th></tr></thead>
+      <tbody>
+        ${dev.map(([l,h,v])=>`<tr><td>${l}</td><td class="num">${h===null?'—':h}</td><td class="num">${fmt0(v)}</td></tr>`).join('')}
+        <tr class="total"><td colspan="2">TOTAL DEVENGADO</td><td class="num">${fmt0(r.totalDevengado)}</td></tr>
+      </tbody>
+    </table>
+    <p class="note">Total por horas extra y recargos (dominicales, nocturnas, festivos): <b>${fmt0(extrasTotal)}</b></p>
+
+    <div class="section-label" style="margin-top:18px;">Deducciones</div>
+    <table>
+      <tbody>
+        <tr><td>Aporte a salud (4%)</td><td class="num">${fmt0(r.dedSalud)}</td></tr>
+        <tr><td>Aporte a pensión (4%)</td><td class="num">${fmt0(r.dedPension)}</td></tr>
+        <tr><td>Préstamos</td><td class="num">${fmt0(r.prestamos)}</td></tr>
+        <tr><td>Otros descuentos</td><td class="num">${fmt0(r.otrosDescuentos)}</td></tr>
+        <tr class="total"><td>TOTAL DEDUCCIONES</td><td class="num">${fmt0(r.totalDeducciones)}</td></tr>
+      </tbody>
+    </table>
+
+    <div class="result-box neto" style="margin-top:18px;">
+      <div class="k">Neto a pagar</div><div class="v">${fmt0(r.neto)}</div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;margin-top:60px;">
+      <div style="text-align:center;width:45%;border-top:1px solid var(--ink);padding-top:6px;font-size:12px;">Firma del Empleado</div>
+      <div style="text-align:center;width:45%;border-top:1px solid var(--ink);padding-top:6px;font-size:12px;">Firma del Empleador</div>
+    </div>
+    </div>
+  </div>
+  `;
+}
+
+// ==========================================================================
+// TAB: VACACIONES
+// ==========================================================================
+function renderVacaciones(){
+  const v = state.vacaciones;
+  const r = liquidarVacaciones(v.salario, v.fechaInicio, v.fechaFin);
+  return `
+  <h1 class="page-title">Liquidación de Vacaciones</h1>
+  <p class="page-sub">Fórmula legal: Salario × días del período ÷ 720. Funciona para cualquier rango de fechas, así abarque varios años, sin necesidad de calcular año por año.</p>
+  <div class="card">
+    <div class="section-label">Datos</div>
+    <div class="grid">
+      ${fieldMoney('vacaciones','salario','Salario básico mensual', v.salario)}
+      ${fieldDate('vacaciones','fechaInicio','Fecha inicio del período a liquidar', v.fechaInicio)}
+      ${fieldDate('vacaciones','fechaFin','Fecha fin del período a liquidar', v.fechaFin)}
+    </div>
+  </div>
+  <div id="resultado-vacaciones" class="result-strip">
+    <div class="result-box"><div class="k">Días del período</div><div class="v">${r.dias}</div></div>
+    <div class="result-box"><div class="k">Días de vacaciones causados</div><div class="v">${r.diasCausados.toFixed(2)}</div></div>
+    <div class="result-box total"><div class="k">Valor a pagar</div><div class="v">${fmt0(r.valor)}</div></div>
+  </div>
+  <div class="no-print" style="margin-top:14px;">
+    <button class="btn ghost" onclick="imprimirSeccion('resultado-vacaciones','Liquidación de Vacaciones')">🖨 Imprimir este resultado</button>
+  </div>
+  `;
+}
+
+// ==========================================================================
+// TAB: CESANTIAS Y PRIMA
+// ==========================================================================
+function renderCesantias(){
+  const c = state.cesantias;
+  const r = liquidarCesantiasPrima(c.salario, c.aux, c.fechaInicio, c.fechaFin);
+  return `
+  <h1 class="page-title">Cesantías, Intereses y Prima de Servicios</h1>
+  <p class="page-sub">Fórmula legal: (Salario + Auxilio de transporte) × días del período ÷ 360. Úsala para cesantías anuales, prima semestral, o cualquier período parcial o plurianual.</p>
+  <div class="card">
+    <div class="section-label">Datos</div>
+    <div class="grid">
+      ${fieldMoney('cesantias','salario','Salario básico mensual', c.salario)}
+      ${fieldMoney('cesantias','aux','Auxilio de transporte mensual', c.aux)}
+      ${fieldDate('cesantias','fechaInicio','Fecha inicio del período', c.fechaInicio)}
+      ${fieldDate('cesantias','fechaFin','Fecha fin del período', c.fechaFin)}
+    </div>
+  </div>
+  <div id="resultado-cesantias" class="result-strip">
+    <div class="result-box"><div class="k">Días del período</div><div class="v">${r.dias}</div></div>
+    <div class="result-box"><div class="k">Cesantías</div><div class="v">${fmt0(r.cesantias)}</div></div>
+    <div class="result-box"><div class="k">Intereses a las cesantías</div><div class="v">${fmt0(r.intereses)}</div></div>
+    <div class="result-box total"><div class="k">Prima de servicios</div><div class="v">${fmt0(r.prima)}</div></div>
+  </div>
+  <div class="no-print" style="margin-top:14px;">
+    <button class="btn ghost" onclick="imprimirSeccion('resultado-cesantias','Cesantías, Intereses y Prima')">🖨 Imprimir este resultado</button>
+  </div>
+  `;
+}
+
+// ==========================================================================
+// TAB: LIQUIDACION DE CONTRATO (multi-año)
+// ==========================================================================
+function renderContrato(){
+  const c = state.contrato;
+  const liq = liquidarContrato(c.tramos, c.salariosPendientes);
+  return `
+  <h1 class="page-title">Liquidación con Salario Fijo</h1>
+  <p class="page-sub">Agrega un año por cada salario diferente que tuvo el empleado a lo largo de su vinculación (hasta 10 años atrás). Empieza por la fecha de inicio: el salario mínimo y las tarifas de ese año se traen automáticamente. Si en algún año ya se pagaron cesantías, primas o vacaciones, o la empresa le dio un préstamo, regístralo en ese mismo año para que la liquidación final no lo cobre dos veces.</p>
+
+  <div class="card">
+    <div class="section-label">Años del contrato</div>
+    ${c.tramos.map((t,i)=>{
+      const r = liquidarTramo(t);
+      return `
+      <div class="tramo-card">
+        <div class="tramo-head">
+          <span>Año ${i+1}</span>
+          <div>
+            <button class="btn ghost small" onclick="useSMMLVinTramo(${i})">Volver a traer el SMMLV de ese año</button>
+            ${c.tramos.length>1?`<button class="btn danger small" style="margin-left:6px;" onclick="removeTramo(${i})">Eliminar</button>`:''}
+          </div>
+        </div>
+        <div class="grid">
+          <div class="field"><label>1. Fecha inicio</label>
+            <input type="date" value="${t.fechaInicio}" data-key="contrato.tramos.${i}.fechaInicio" oninput="updTramo(${i},'fechaInicio',this.value)"/></div>
+          <div class="field"><label>2. Fecha fin</label>
+            <input type="date" value="${t.fechaFin}" data-key="contrato.tramos.${i}.fechaFin" oninput="updTramo(${i},'fechaFin',this.value)"/></div>
+          ${fieldMoneyTramo(i,'salario','3. Salario mensual (autocompletado, editable)', t.salario)}
+          <div class="checkbox-row" style="padding-top:24px;">
+            <input type="checkbox" id="aux-${i}" data-key="contrato.tramos.${i}.recibeAux" ${t.recibeAux?'checked':''} onchange="updTramo(${i},'recibeAux',this.checked)"/>
+            <label for="aux-${i}">Recibió auxilio de transporte</label>
+          </div>
+        </div>
+        <div class="hr" style="margin:14px 0;"></div>
+        <p class="card-note" style="margin-bottom:8px;">¿Ya se le pagó algo de esto durante ese año? Regístralo aquí para no cobrarlo dos veces:</p>
+        <div class="grid">
+          ${fieldMoneyTramo(i,'cesantiasPagadas','Cesantías ya consignadas ese año', t.cesantiasPagadas)}
+          ${fieldMoneyTramo(i,'primaPagada','Prima ya pagada ese año', t.primaPagada)}
+          ${fieldMoneyTramo(i,'vacacionesPagadas','Vacaciones ya pagadas/disfrutadas ese año', t.vacacionesPagadas)}
+          ${fieldMoneyTramo(i,'prestamo','Préstamo de la empresa a descontar', t.prestamo)}
+        </div>
+        <div class="tramo-result">
+          <span><b>Días:</b> ${r.dias}</span>
+          <span><b>Aux. aplicado:</b> ${fmt0(r.aux)}</span>
+          <span><b>Cesantías:</b> ${r.cesantiasPendientes===r.cesantiasCausadas ? fmt0(r.cesantiasCausadas) : `${fmt0(r.cesantiasCausadas)} causadas → ${fmt0(r.cesantiasPendientes)} pendientes`}</span>
+          <span><b>Intereses (sobre lo pendiente):</b> ${fmt0(r.intereses)}</span>
+          <span><b>Prima:</b> ${r.primaPendiente===r.primaCausada ? fmt0(r.primaCausada) : `${fmt0(r.primaCausada)} causada → ${fmt0(r.primaPendiente)} pendiente`}</span>
+          <span><b>Vacaciones:</b> ${r.vacacionesPendientes===r.vacacionesCausadas ? fmt0(r.vacacionesCausadas) : `${fmt0(r.vacacionesCausadas)} causadas → ${fmt0(r.vacacionesPendientes)} pendientes`}</span>
+          ${r.prestamo>0 ? `<span><b>Préstamo a descontar:</b> − ${fmt0(r.prestamo)}</span>` : ''}
+          <span><b>Saldo de este año:</b> ${fmt0(r.totalAño)}</span>
+        </div>
+      </div>`;
+    }).join('')}
+    <button class="btn ghost" onclick="addTramo()">+ Agregar año</button>
+  </div>
+
+  <div class="card">
+    <div class="section-label">Ajustes finales (no ligados a un año específico)</div>
+    <div class="grid">
+      ${fieldMoney('contrato','salariosPendientes','Salarios pendientes por pagar ($)', c.salariosPendientes)}
+    </div>
+  </div>
+
+  <div id="resultado-contrato">
+  <div class="card">
+    <div class="section-label">Resumen de la liquidación — discriminado por año</div>
+    <table>
+      <thead><tr><th>Año</th><th class="num">Cesantías pend.</th><th class="num">Intereses</th><th class="num">Prima pend.</th><th class="num">Vacaciones pend.</th><th class="num">Préstamo</th><th class="num">Saldo del año</th></tr></thead>
+      <tbody>
+        ${liq.detalle.map((r,i)=>`<tr>
+          <td>Año ${i+1}</td>
+          <td class="num">${fmt0(r.cesantiasPendientes)}</td>
+          <td class="num">${fmt0(r.intereses)}</td>
+          <td class="num">${fmt0(r.primaPendiente)}</td>
+          <td class="num">${fmt0(r.vacacionesPendientes)}</td>
+          <td class="num">− ${fmt0(r.prestamo)}</td>
+          <td class="num">${fmt0(r.totalAño)}</td>
+        </tr>`).join('')}
+        <tr class="total">
+          <td>Suma de todos los años</td>
+          <td class="num">${fmt0(liq.cesantiasPendientes)}</td>
+          <td class="num">${fmt0(liq.totalIntereses)}</td>
+          <td class="num">${fmt0(liq.primaPendiente)}</td>
+          <td class="num">${fmt0(liq.vacacionesPendientes)}</td>
+          <td class="num">− ${fmt0(liq.totalPrestamos)}</td>
+          <td class="num">${fmt0(liq.cesantiasPendientes+liq.totalIntereses+liq.primaPendiente+liq.vacacionesPendientes-liq.totalPrestamos)}</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="note">Días totales laborados (suma de los años agregados): ${liq.totalDias}. Cesantías causadas en total: ${fmt0(liq.cesantiasCausadas)} (de las cuales ya se consignaron ${fmt0(liq.cesantiasCausadas-liq.cesantiasPendientes)}). Prima causada en total: ${fmt0(liq.primaCausada)} (de la cual ya se pagó ${fmt0(liq.primaCausada-liq.primaPendiente)}). Vacaciones causadas en total: ${fmt0(liq.vacacionesCausadas)} (de las cuales ya se pagaron/disfrutaron ${fmt0(liq.vacacionesCausadas-liq.vacacionesPendientes)}).</p>
+    <table style="margin-top:14px;">
+      <tbody>
+        <tr><td>Salarios pendientes por pagar</td><td class="num">${fmt0(c.salariosPendientes)}</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="result-strip">
+    <div class="result-box total" style="flex:none;min-width:280px;"><div class="k">Total a pagar (saldo real, ya descontado lo pagado y los préstamos)</div><div class="v">${fmt0(liq.total)}</div></div>
+  </div>
+  </div>
+  <div class="no-print" style="margin-top:14px;">
+    <button class="btn ghost" onclick="imprimirSeccion('resultado-contrato','Liquidación con Salario Fijo')">🖨 Imprimir este resultado</button>
+  </div>
+  `;
+}
+
+// ==========================================================================
+// TAB: COSTO TOTAL EMPLEADO
+// ==========================================================================
+function renderCosto(){
+  const c = state.costo;
+  const r = costoTotalEmpleado({
+    salario:c.salario, recibeAux:c.recibeAux, fechaRef:TODAY, exoneradoParafiscales:c.exonerado,
+    claseRiesgo:c.claseRiesgo, recibeDotacion:c.recibeDotacion, valorDotacion:c.valorDotacion,
+    entregasDotacion:c.entregasDotacion, otorgaAguinaldo:c.otorgaAguinaldo, valorAguinaldo:c.valorAguinaldo,
+  });
+  return `
+  <h1 class="page-title">Costo Total Mensual del Empleado</h1>
+  <p class="page-sub">Todo lo que le cuesta un empleado a la empresa cada mes, y cuánto conviene reservar mensualmente para tener siempre cubierta su liquidación.</p>
+
+  <div class="card">
+    <div class="section-label">Datos del empleado</div>
+    <div class="grid">
+      ${fieldMoney('costo','salario','Salario básico mensual', c.salario)}
+      ${fieldSelect('costo','claseRiesgo','Clase de riesgo ARL', c.claseRiesgo,[{v:'I',l:'I — 0.522%'},{v:'II',l:'II — 1.044%'},{v:'III',l:'III — 2.436%'},{v:'IV',l:'IV — 4.35%'},{v:'V',l:'V — 6.96%'}])}
+      ${fieldMoney('costo','valorDotacion','Valor de dotación por entrega ($)', c.valorDotacion)}
+      ${fieldNumber('costo','entregasDotacion','Entregas de dotación al año', c.entregasDotacion)}
+      ${fieldMoney('costo','valorAguinaldo','Valor aguinaldo por empleado ($)', c.valorAguinaldo)}
+    </div>
+    <div style="display:flex;gap:24px;flex-wrap:wrap;margin-top:6px;">
+      ${checkbox('costo','recibeAux','Recibe auxilio de transporte', c.recibeAux)}
+      ${checkbox('costo','exonerado','Empleador exonerado de parafiscales', c.exonerado)}
+      ${checkbox('costo','recibeDotacion','Empleado recibe dotación (salario ≤ 2 SMMLV)', c.recibeDotacion)}
+      ${checkbox('costo','otorgaAguinaldo','La empresa otorga aguinaldo', c.otorgaAguinaldo)}
+    </div>
+  </div>
+
+  <div id="resultado-costo">
+  <div class="card">
+    <div class="section-label">Desglose mensual</div>
+    <table>
+      <tbody>
+        <tr><td>Salario básico</td><td class="num">${fmt0(c.salario)}</td></tr>
+        <tr><td>Auxilio de transporte</td><td class="num">${fmt0(r.aux)}</td></tr>
+        <tr><td>Salud (empleador)</td><td class="num">${fmt0(r.saludEmpleador)} ${r.exonera?'<span class="tag green">exonerado</span>':''}</td></tr>
+        <tr><td>Pensión (empleador)</td><td class="num">${fmt0(r.pensionEmpleador)}</td></tr>
+        <tr><td>ARL</td><td class="num">${fmt0(r.arl)}</td></tr>
+        <tr><td>Caja de Compensación</td><td class="num">${fmt0(r.caja)}</td></tr>
+        <tr><td>SENA</td><td class="num">${fmt0(r.sena)} ${r.exonera?'<span class="tag green">exonerado</span>':''}</td></tr>
+        <tr><td>ICBF</td><td class="num">${fmt0(r.icbf)} ${r.exonera?'<span class="tag green">exonerado</span>':''}</td></tr>
+        <tr><td>Provisión cesantías</td><td class="num">${fmt0(r.provCesantias)}</td></tr>
+        <tr><td>Provisión intereses a las cesantías</td><td class="num">${fmt0(r.provIntereses)}</td></tr>
+        <tr><td>Provisión prima de servicios</td><td class="num">${fmt0(r.provPrima)}</td></tr>
+        <tr><td>Provisión vacaciones</td><td class="num">${fmt0(r.provVacaciones)}</td></tr>
+        <tr><td>Dotación mensualizada</td><td class="num">${fmt0(r.dotacionMensual)}</td></tr>
+        <tr><td>Aguinaldo mensualizado</td><td class="num">${fmt0(r.aguinaldoMensual)}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="result-strip">
+    <div class="result-box"><div class="k">Reserva mensual recomendada*</div><div class="v">${fmt0(r.reservaMensual)}</div></div>
+    <div class="result-box total"><div class="k">Costo total mensual</div><div class="v">${fmt0(r.costoTotalMensual)}</div></div>
+  </div>
+  </div>
+  <div class="no-print" style="margin-top:14px;">
+    <button class="btn ghost" onclick="imprimirSeccion('resultado-costo','Costo Total del Empleado')">🖨 Imprimir este resultado</button>
+  </div>
+  <p class="note">* Cesantías + intereses + prima + vacaciones. Ahorrando este valor cada mes, la empresa mantiene cubierta la liquidación del empleado en cualquier momento del año.</p>
+  `;
+}
+
+// ==========================================================================
+// TAB: SALARIO VARIABLE (RECARGOS Y HORAS EXTRA HABITUALES)
+// ==========================================================================
+function renderVariable(){
+  const meses = state.variable.meses;
+  const r = calcularLiquidacionVariable(meses);
+  const smmlvHoy = getSMMLV(TODAY).smmlv;
+  const diferenciaVsMinimo = r.n>0 ? r.promedioCesantias - smmlvHoy : 0;
+
+  return `
+  <h1 class="page-title">Liquidación con Salario Variable</h1>
+  <p class="page-sub">Para un empleado cuyo ingreso mensual cambia por horas extra o recargos habituales (por ejemplo, turnos nocturnos frecuentes), la ley no permite liquidar sus prestaciones sobre el salario básico fijo — hay que usar el <b>promedio de lo realmente devengado</b>. Registra mes a mes lo que ganó hasta completar el tiempo a liquidar, y el sistema aplica el promedio correcto que exige cada prestación.</p>
+
+  <div class="card">
+    <div class="section-label">¿Cuándo se usa esta pestaña en vez del Simulador de Nómina normal?</div>
+    <p class="card-note" style="margin-bottom:0;">Cuando el empleado tiene, mes tras mes, montos distintos por trabajar de noche, en domingos/festivos, o en horas extra de forma recurrente — no un mes aislado. Si su pago es prácticamente el mismo cada mes (salario fijo), usa el Simulador de Nómina y la Liquidación con Salario Fijo normales; ahí el salario básico ya es la base correcta.</p>
+  </div>
+
+  <div class="card">
+    <div class="section-label">Salario devengado mes a mes</div>
+    <table>
+      <thead><tr>
+        <th>Mes</th><th class="num">Total devengado ese mes</th>
+        <th class="num">De eso, horas extra + recargo dominical/festivo<br/><span style="font-weight:400;text-transform:none;">(se excluye solo de la base de vacaciones)</span></th>
+        <th></th>
+      </tr></thead>
+      <tbody>
+        ${meses.map((m,i)=>`<tr>
+          <td>
+            <input type="date" value="${m.mes}" data-key="variable.meses.${i}.mes" oninput="updMesVariable(${i},'mes',this.value)"/>
+            <button class="btn ghost small" style="margin-left:4px;" onclick="useSMMLVenMes(${i})" title="Usar el SMMLV vigente ese mes">SMMLV</button>
+          </td>
+          <td>${fieldMoneyMes(i,'devengado','', m.devengado)}</td>
+          <td>${fieldMoneyMes(i,'extrasYDominical','', m.extrasYDominical)}</td>
+          <td>${meses.length>1?`<button class="btn danger small" onclick="removeMesVariable(${i})">✕</button>`:''}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+    <button class="btn ghost" style="margin-top:12px;" onclick="addMesVariable()">+ Agregar mes</button>
+    <p class="note">Escribe en "Total devengado" todo lo que el empleado recibió ese mes: salario básico, auxilio de transporte, horas extra, recargos nocturnos y dominicales, comisiones o bonificaciones habituales. En la segunda columna, indica cuánto de ese total correspondió específicamente a horas extra y a recargo por trabajo en domingo/festivo — la ley excluye ese valor solo de la base con la que se calculan las vacaciones (Art. 192 CST), no de cesantías ni de prima.</p>
+  </div>
+
+  <div class="card">
+    <div class="section-label">Promedios aplicados (según la norma)</div>
+    <table>
+      <tbody>
+        <tr><td>Promedio mensual para <b>cesantías e intereses</b> (últimos ${Math.min(r.n,12)} de ${r.n} meses registrados)</td><td class="num">${fmt0(r.promedioCesantias)}</td></tr>
+        <tr><td>Promedio mensual para <b>prima de servicios</b> (últimos ${Math.min(r.n,6)} de ${r.n} meses registrados — el semestre)</td><td class="num">${fmt0(r.promedioPrima)}</td></tr>
+        <tr><td>Promedio mensual para <b>vacaciones</b> (últimos ${Math.min(r.n,12)} meses, sin horas extra ni recargo dominical)</td><td class="num">${fmt0(r.promedioVacaciones)}</td></tr>
+      </tbody>
+    </table>
+    ${diferenciaVsMinimo>0 ? `<p class="note">Ese promedio para cesantías es <b>${fmt0(diferenciaVsMinimo)} más alto</b> que el SMMLV vigente (${fmt0(smmlvHoy)}) — esa diferencia es justamente el efecto de los recargos y horas extra habituales, y la ley obliga a reflejarla en la liquidación, no a ignorarla usando solo el salario mínimo.</p>` : ''}
+  </div>
+
+  <div id="resultado-variable">
+  <div class="card">
+    <div class="section-label">Liquidación resultante</div>
+    <table>
+      <tbody>
+        <tr><td>Días liquidados (${r.n} mes(es) × 30 días)</td><td class="num">${r.diasTotales}</td></tr>
+        <tr><td>Cesantías</td><td class="num">${fmt0(r.cesantias)}</td></tr>
+        <tr><td>Intereses a las cesantías</td><td class="num">${fmt0(r.intereses)}</td></tr>
+        <tr><td>Prima de servicios</td><td class="num">${fmt0(r.prima)}</td></tr>
+        <tr><td>Vacaciones</td><td class="num">${fmt0(r.vacaciones)}</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="result-strip">
+    <div class="result-box total" style="flex:none;min-width:280px;"><div class="k">Total (cesantías + intereses + prima + vacaciones)</div><div class="v">${fmt0(r.total)}</div></div>
+  </div>
+  </div>
+  <div class="no-print" style="margin-top:14px;">
+    <button class="btn ghost" onclick="imprimirSeccion('resultado-variable','Liquidación con Salario Variable')">🖨 Imprimir este resultado</button>
+  </div>
+  <p class="note">Esta pestaña no descuenta cesantías, prima o vacaciones ya pagadas en años anteriores — si necesitas combinar salario variable con varios años y pagos parciales previos, usa esta pestaña para calcular el promedio correcto de cada prestación y trasládalo manualmente a la Liquidación con Salario Fijo.</p>
+  `;
+}
+
+// ==========================================================================
+// RENDER PRINCIPAL
+// ==========================================================================
+function renderTabContent(){
+  switch(state.activeTab){
+    case 'inicio': return renderInicio();
+    case 'normativa': return renderNormativa();
+    case 'tarifas': return renderTarifas();
+    case 'horarios': return renderHorarios();
+    case 'nomina': return renderNomina();
+    case 'vacaciones': return renderVacaciones();
+    case 'cesantias': return renderCesantias();
+    case 'contrato': return renderContrato();
+    case 'costo': return renderCosto();
+    case 'variable': return renderVariable();
+    case 'iaConsulta': return renderIAConsulta();
+    case 'sugerencias': return renderSugerencias();
+    default: return renderInicio();
+  }
+}
+
+function doRender(){
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <nav class="sidebar no-print">
+      <div class="brand">
+        <div class="brand-mark">Nómina CO</div>
+        <div class="brand-sub">Calculadora laboral</div>
+        <div class="brand-watermark">Diseñado y desarrollado por<br/>anacrojassz, con IA (Claude · Anthropic)</div>
+      </div>
+      <ul class="nav">
+        ${TABS.map((t,i)=>`<li><button class="${state.activeTab===t.id?'active':''}" onclick="setTab('${t.id}')"><span class="num">${String(i).padStart(2,'0')}</span>${t.label}</button></li>`).join('')}
+      </ul>
+      <div class="sidebar-foot">Normativa vigente a julio de 2026.<br/>Los cálculos son de referencia; verifica casos particulares con tu asesor laboral.</div>
+    </nav>
+    <div class="tab-mobile no-print">
+      ${TABS.map(t=>`<button class="${state.activeTab===t.id?'active':''}" onclick="setTab('${t.id}')">${t.label}</button>`).join('')}
+    </div>
+    <div class="main">
+      <div class="topbar no-print">
+        <div class="topbar-title">${TABS.find(t=>t.id===state.activeTab).label}</div>
+        ${stampHTML()}
+      </div>
+      <div class="content">${renderTabContent()}</div>
+    </div>
+  `;
+}
+
+// Envuelve doRender() para que, al reconstruir el DOM en cada tecla,
+// el campo donde la persona está escribiendo conserve el foco y la
+// posición del cursor (si no, cada tecla obliga a volver a hacer clic).
+function render(){
+  const active = document.activeElement;
+  let key = null, selFromEnd = null;
+  if (active && active.getAttribute) key = active.getAttribute('data-key');
+  if (key && typeof active.selectionStart === 'number') {
+    selFromEnd = active.value.length - active.selectionStart;
+  }
+  doRender();
+  if (key) {
+    const all = document.querySelectorAll('[data-key]');
+    let el = null;
+    for (const c of all) { if (c.getAttribute('data-key') === key) { el = c; break; } }
+    if (el) {
+      el.focus();
+      if (selFromEnd !== null) {
+        try {
+          const pos = Math.max(0, el.value.length - selFromEnd);
+          el.setSelectionRange(pos, pos);
+        } catch (e) { /* algunos inputs (type=number) no soportan seleccion */ }
+      }
+    }
+  }
+}
+render();
+</script>
+</body>
+</html>
